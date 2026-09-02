@@ -13,7 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class TcgStateDecoder
 {
-	private static final String VERSION_PREFIX = "RLTCG_v2:";
+	private static final String VERSION_PREFIX_V3 = "RLTCG_v3:";
+	private static final String VERSION_PREFIX_V2 = "RLTCG_v2:";
 	private static final byte[] SALT = "RLTCG|osrs-tcg!".getBytes(StandardCharsets.US_ASCII);
 
 	private TcgStateDecoder()
@@ -22,17 +23,27 @@ public final class TcgStateDecoder
 
 	public static Optional<String> decode(String raw)
 	{
-		if (raw == null || !raw.startsWith(VERSION_PREFIX))
+		if (raw == null)
 		{
 			return Optional.empty();
 		}
 
 		try
 		{
-			byte[] decoded = Base64.getDecoder().decode(raw.substring(VERSION_PREFIX.length()));
-			byte[] xored = xor(decoded);
-			byte[] decompressed = gunzip(xored);
-			return Optional.of(new String(decompressed, StandardCharsets.UTF_8));
+			if (raw.startsWith(VERSION_PREFIX_V3))
+			{
+				byte[] decoded = Base64.getDecoder().decode(raw.substring(VERSION_PREFIX_V3.length()));
+				return Optional.of(new String(gunzip(decoded), StandardCharsets.UTF_8));
+			}
+
+			if (raw.startsWith(VERSION_PREFIX_V2))
+			{
+				byte[] decoded = Base64.getDecoder().decode(raw.substring(VERSION_PREFIX_V2.length()));
+				byte[] xored = xor(decoded);
+				return Optional.of(new String(gunzip(xored), StandardCharsets.UTF_8));
+			}
+
+			return Optional.empty();
 		}
 		catch (Exception e)
 		{

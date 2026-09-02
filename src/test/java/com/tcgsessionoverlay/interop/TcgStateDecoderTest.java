@@ -13,14 +13,27 @@ import static org.junit.Assert.assertTrue;
 
 public class TcgStateDecoderTest
 {
-	private static final String VERSION_PREFIX = "RLTCG_v2:";
+	private static final String VERSION_PREFIX_V3 = "RLTCG_v3:";
+	private static final String VERSION_PREFIX_V2 = "RLTCG_v2:";
 	private static final byte[] SALT = "RLTCG|osrs-tcg!".getBytes(StandardCharsets.US_ASCII);
 
 	@Test
-	public void decodesKnownGoodFixture() throws Exception
+	public void decodesV3Fixture() throws Exception
 	{
 		String json = "{\"cardInstances\":[],\"credits\":12345}";
-		String encoded = encode(json);
+		String encoded = encodeV3(json);
+
+		Optional<String> decoded = TcgStateDecoder.decode(encoded);
+
+		assertTrue(decoded.isPresent());
+		assertEquals(json, decoded.get());
+	}
+
+	@Test
+	public void decodesLegacyV2Fixture() throws Exception
+	{
+		String json = "{\"cardInstances\":[],\"credits\":12345}";
+		String encoded = encodeV2(json);
 
 		Optional<String> decoded = TcgStateDecoder.decode(encoded);
 
@@ -43,10 +56,27 @@ public class TcgStateDecoderTest
 	@Test
 	public void rejectsCorruptPayload()
 	{
-		assertFalse(TcgStateDecoder.decode(VERSION_PREFIX + "not-valid-base64!!!").isPresent());
+		assertFalse(TcgStateDecoder.decode(VERSION_PREFIX_V3 + "not-valid-base64!!!").isPresent());
 	}
 
-	private static String encode(String json) throws Exception
+	private static String encodeV3(String json) throws Exception
+	{
+		return VERSION_PREFIX_V3 + Base64.getEncoder().encodeToString(gzip(json));
+	}
+
+	private static String encodeV2(String json) throws Exception
+	{
+		byte[] gzipped = gzip(json);
+		byte[] xored = new byte[gzipped.length];
+		for (int i = 0; i < gzipped.length; i++)
+		{
+			xored[i] = (byte) (gzipped[i] ^ SALT[i % SALT.length]);
+		}
+
+		return VERSION_PREFIX_V2 + Base64.getEncoder().encodeToString(xored);
+	}
+
+	private static byte[] gzip(String json) throws Exception
 	{
 		ByteArrayOutputStream gzipped = new ByteArrayOutputStream();
 		try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(gzipped))
@@ -54,13 +84,6 @@ public class TcgStateDecoderTest
 			gzipOutputStream.write(json.getBytes(StandardCharsets.UTF_8));
 		}
 
-		byte[] gzippedBytes = gzipped.toByteArray();
-		byte[] xored = new byte[gzippedBytes.length];
-		for (int i = 0; i < gzippedBytes.length; i++)
-		{
-			xored[i] = (byte) (gzippedBytes[i] ^ SALT[i % SALT.length]);
-		}
-
-		return VERSION_PREFIX + Base64.getEncoder().encodeToString(xored);
+		return gzipped.toByteArray();
 	}
 }
