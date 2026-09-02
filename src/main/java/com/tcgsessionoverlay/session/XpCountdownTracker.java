@@ -1,6 +1,11 @@
 package com.tcgsessionoverlay.session;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import javax.inject.Singleton;
 import net.runelite.api.Skill;
@@ -11,11 +16,13 @@ import net.runelite.client.eventbus.Subscribe;
 public class XpCountdownTracker
 {
 	private static final int BLOCK_SIZE = 1000;
+	private static final int SAMPLE_WINDOW = 10;
 
 	private final Map<Skill, Integer> lastKnownXp = new EnumMap<>(Skill.class);
+	private final Deque<Integer> recentActionXp = new ArrayDeque<>();
 
 	private int xpInCurrentBlock;
-	private Skill lastSkillGained;
+	private Skill trackedSkill;
 
 	@Subscribe
 	public void onStatChanged(StatChanged statChanged)
@@ -35,7 +42,18 @@ public class XpCountdownTracker
 			return;
 		}
 
-		lastSkillGained = skill;
+		if (skill != trackedSkill)
+		{
+			trackedSkill = skill;
+			recentActionXp.clear();
+		}
+
+		recentActionXp.addLast(gained);
+		if (recentActionXp.size() > SAMPLE_WINDOW)
+		{
+			recentActionXp.removeFirst();
+		}
+
 		xpInCurrentBlock = (xpInCurrentBlock + gained) % BLOCK_SIZE;
 	}
 
@@ -49,8 +67,38 @@ public class XpCountdownTracker
 		return BLOCK_SIZE - xpInCurrentBlock;
 	}
 
-	public Skill getLastSkillGained()
+	public Skill getTrackedSkill()
 	{
-		return lastSkillGained;
+		return trackedSkill;
+	}
+
+	public int getMedianXpPerAction()
+	{
+		if (recentActionXp.isEmpty())
+		{
+			return 0;
+		}
+
+		List<Integer> sorted = new ArrayList<>(recentActionXp);
+		Collections.sort(sorted);
+
+		int middle = sorted.size() / 2;
+		if (sorted.size() % 2 == 0)
+		{
+			return (sorted.get(middle - 1) + sorted.get(middle)) / 2;
+		}
+
+		return sorted.get(middle);
+	}
+
+	public int getActionsRemaining()
+	{
+		int medianXp = getMedianXpPerAction();
+		if (medianXp <= 0)
+		{
+			return -1;
+		}
+
+		return (int) Math.ceil(getXpRemainingInBlock() / (double) medianXp);
 	}
 }
