@@ -1,6 +1,8 @@
 package com.tcgsessionoverlay.session;
 
 import com.google.gson.reflect.TypeToken;
+import com.tcgsessionoverlay.interop.TcgState;
+import com.tcgsessionoverlay.interop.TcgStateReader;
 import java.lang.reflect.Type;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -9,9 +11,12 @@ import java.util.Deque;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import net.runelite.api.Client;
 import net.runelite.api.Skill;
+import net.runelite.api.events.GameTick;
 import net.runelite.api.events.StatChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -28,22 +33,28 @@ public class XpCountdownTracker
 	{
 	}.getType();
 
+	private final Client client;
 	private final ConfigManager configManager;
+	private final TcgStateReader tcgStateReader;
 	private final Map<Skill, Integer> lastKnownXp = new EnumMap<>(Skill.class);
 	private final Map<Skill, Integer> xpInBlockBySkill = new EnumMap<>(Skill.class);
 	private final Deque<Integer> recentActionXp = new ArrayDeque<>();
 
 	private Skill trackedSkill;
+	private long anchoredSaveTime;
 
 	@Inject
-	public XpCountdownTracker(ConfigManager configManager)
+	public XpCountdownTracker(Client client, ConfigManager configManager, TcgStateReader tcgStateReader)
 	{
+		this.client = client;
 		this.configManager = configManager;
+		this.tcgStateReader = tcgStateReader;
 	}
 
 	@Subscribe
 	public void onRuneScapeProfileChanged(RuneScapeProfileChanged event)
 	{
+		anchoredSaveTime = 0;
 		loadState();
 	}
 
@@ -60,6 +71,50 @@ public class XpCountdownTracker
 	private void saveState()
 	{
 		configManager.setRSProfileConfiguration(CONFIG_GROUP, XP_IN_BLOCK_KEY, xpInBlockBySkill);
+	}
+
+	@Subscribe
+	public void onGameTick(GameTick event)
+	{
+		anchorToSavedState();
+	}
+
+	private void anchorToSavedState()
+	{
+		Optional<TcgState> state = tcgStateReader.getState();
+		if (!state.isPresent())
+		{
+			return;
+		}
+
+		TcgState saved = state.get();
+		if (saved.getProfileSavedAtUnix() == anchoredSaveTime)
+		{
+			return;
+		}
+
+		anchoredSaveTime = saved.getProfileSavedAtUnix();
+
+		for (Skill skill : Skill.values())
+		{
+			if (!saved.hasBaselineXp(skill))
+			{
+				continue;
+			}
+
+			xpInBlockBySkill.put(skill, anchoredBlockXp(
+				saved.getUncreditedXp(skill),
+				saved.getBaselineXp(skill),
+				client.getSkillExperience(skill)));
+		}
+
+		saveState();
+	}
+
+	static int anchoredBlockXp(long savedCarry, long savedSkillXp, long currentSkillXp)
+	{
+		long xpSinceSave = currentSkillXp - savedSkillXp;
+		return (int) Math.floorMod(savedCarry + xpSinceSave, (long) BLOCK_SIZE);
 	}
 
 	@Subscribe
