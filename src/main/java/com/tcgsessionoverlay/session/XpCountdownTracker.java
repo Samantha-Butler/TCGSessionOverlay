@@ -1,5 +1,7 @@
 package com.tcgsessionoverlay.session;
 
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,13 +23,16 @@ public class XpCountdownTracker
 	private static final int BLOCK_SIZE = 1000;
 	private static final int SAMPLE_WINDOW = 10;
 	private static final String CONFIG_GROUP = "tcgsessionoverlay";
-	private static final String XP_IN_BLOCK_KEY = "xpInCurrentBlock";
+	private static final String XP_IN_BLOCK_KEY = "xpInBlockBySkill";
+	private static final Type XP_IN_BLOCK_TYPE = new TypeToken<Map<Skill, Integer>>()
+	{
+	}.getType();
 
 	private final ConfigManager configManager;
 	private final Map<Skill, Integer> lastKnownXp = new EnumMap<>(Skill.class);
+	private final Map<Skill, Integer> xpInBlockBySkill = new EnumMap<>(Skill.class);
 	private final Deque<Integer> recentActionXp = new ArrayDeque<>();
 
-	private int xpInCurrentBlock;
 	private Skill trackedSkill;
 
 	@Inject
@@ -44,16 +49,17 @@ public class XpCountdownTracker
 
 	private void loadState()
 	{
-		Integer saved = configManager.getRSProfileConfiguration(CONFIG_GROUP, XP_IN_BLOCK_KEY, Integer.class);
+		Map<Skill, Integer> saved = configManager.getRSProfileConfiguration(CONFIG_GROUP, XP_IN_BLOCK_KEY, XP_IN_BLOCK_TYPE);
+		xpInBlockBySkill.clear();
 		if (saved != null)
 		{
-			xpInCurrentBlock = saved;
+			xpInBlockBySkill.putAll(saved);
 		}
 	}
 
 	private void saveState()
 	{
-		configManager.setRSProfileConfiguration(CONFIG_GROUP, XP_IN_BLOCK_KEY, xpInCurrentBlock);
+		configManager.setRSProfileConfiguration(CONFIG_GROUP, XP_IN_BLOCK_KEY, xpInBlockBySkill);
 	}
 
 	@Subscribe
@@ -86,18 +92,24 @@ public class XpCountdownTracker
 			recentActionXp.removeFirst();
 		}
 
-		xpInCurrentBlock = (xpInCurrentBlock + gained) % BLOCK_SIZE;
+		int updatedBlockXp = (xpInBlockBySkill.getOrDefault(skill, 0) + gained) % BLOCK_SIZE;
+		xpInBlockBySkill.put(skill, updatedBlockXp);
 		saveState();
 	}
 
 	public int getXpInCurrentBlock()
 	{
-		return xpInCurrentBlock;
+		if (trackedSkill == null)
+		{
+			return 0;
+		}
+
+		return xpInBlockBySkill.getOrDefault(trackedSkill, 0);
 	}
 
 	public int getXpRemainingInBlock()
 	{
-		return BLOCK_SIZE - xpInCurrentBlock;
+		return BLOCK_SIZE - getXpInCurrentBlock();
 	}
 
 	public Skill getTrackedSkill()
