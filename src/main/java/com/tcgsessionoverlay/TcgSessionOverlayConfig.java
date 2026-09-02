@@ -11,7 +11,7 @@ public interface TcgSessionOverlayConfig extends Config
 	@ConfigItem(
 		keyName = "showCredits",
 		name = "Show credits",
-		description = "Show the credit balance, session earnings, packs affordable and progress to the next pack.",
+		description = "Show the credit balance, session earnings, packs you can buy now and progress to the next pack.",
 		position = 1
 	)
 	default boolean showCredits()
@@ -23,7 +23,7 @@ public interface TcgSessionOverlayConfig extends Config
 	@ConfigItem(
 		keyName = "packCost",
 		name = "Pack cost",
-		description = "Credits per pack, used for packs affordable and progress to the next pack. Set this to the price of the pack you buy, shown on the Shop tab of the OSRS TCG panel.",
+		description = "Credits per pack, taken from the Shop tab of the OSRS TCG panel. Press Enter or use the arrows to apply a typed value.",
 		position = 2
 	)
 	default int packCost()

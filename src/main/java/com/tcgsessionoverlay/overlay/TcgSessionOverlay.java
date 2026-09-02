@@ -20,6 +20,7 @@ import net.runelite.client.util.QuantityFormatter;
 public class TcgSessionOverlay extends OverlayPanel
 {
 	private static final Color SECTION_COLOR = Color.ORANGE;
+	private static final int PANEL_WIDTH = 160;
 
 	private final TcgSessionOverlayConfig config;
 	private final CreditsTracker creditsTracker;
@@ -36,6 +37,7 @@ public class TcgSessionOverlay extends OverlayPanel
 		this.xpCountdownTracker = xpCountdownTracker;
 		setPosition(OverlayPosition.TOP_LEFT);
 		panelComponent.setGap(new Point(0, 4));
+		panelComponent.setPreferredSize(new Dimension(PANEL_WIDTH, 0));
 	}
 
 	@Override
@@ -72,7 +74,7 @@ public class TcgSessionOverlay extends OverlayPanel
 
 		addLine("Balance", QuantityFormatter.formatNumber(creditsTracker.getCredits()));
 		addLine("This session", "+" + QuantityFormatter.formatNumber(creditsTracker.getSessionCreditsEarned()));
-		addLine("Packs affordable", QuantityFormatter.formatNumber(creditsTracker.getPacksAffordable()));
+		addLine("Ready to buy", QuantityFormatter.formatNumber(creditsTracker.getPacksAffordable()));
 		addLine("Next pack", QuantityFormatter.formatNumber(creditsTracker.getCreditsTowardNextPack())
 			+ " / " + QuantityFormatter.formatNumber(creditsTracker.getPackCost()));
 	}
