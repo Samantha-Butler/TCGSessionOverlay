@@ -45,7 +45,8 @@ public final class TcgStateParser
 				readLong(root, "openedPacks"),
 				readLong(root, "totalCreditsGained"),
 				readLong(root, "profileSavedAtUnix"),
-				parseUncreditedXp(root),
+				parseSkillMap(root, "uncreditedXpBySkill"),
+				parseSkillMap(root, "skillXp"),
 				ownedCards,
 				countCardEntries(root)));
 		}
@@ -99,22 +100,22 @@ public final class TcgStateParser
 		return cards;
 	}
 
-	private static Map<Skill, Long> parseUncreditedXp(JsonObject root)
+	private static Map<Skill, Long> parseSkillMap(JsonObject root, String key)
 	{
-		Map<Skill, Long> uncredited = new EnumMap<>(Skill.class);
+		Map<Skill, Long> bySkill = new EnumMap<>(Skill.class);
 		JsonElement baselineElement = root.get("skillCreditBaseline");
 		if (baselineElement == null || !baselineElement.isJsonObject())
 		{
-			return uncredited;
+			return bySkill;
 		}
 
-		JsonElement uncreditedElement = baselineElement.getAsJsonObject().get("uncreditedXpBySkill");
-		if (uncreditedElement == null || !uncreditedElement.isJsonObject())
+		JsonElement mapElement = baselineElement.getAsJsonObject().get(key);
+		if (mapElement == null || !mapElement.isJsonObject())
 		{
-			return uncredited;
+			return bySkill;
 		}
 
-		for (Map.Entry<String, JsonElement> entry : uncreditedElement.getAsJsonObject().entrySet())
+		for (Map.Entry<String, JsonElement> entry : mapElement.getAsJsonObject().entrySet())
 		{
 			Skill skill = SKILLS_BY_NAME.get(entry.getKey());
 			if (skill == null || !entry.getValue().isJsonPrimitive())
@@ -122,10 +123,10 @@ public final class TcgStateParser
 				continue;
 			}
 
-			uncredited.put(skill, entry.getValue().getAsLong());
+			bySkill.put(skill, entry.getValue().getAsLong());
 		}
 
-		return uncredited;
+		return bySkill;
 	}
 
 	private static int countCardEntries(JsonObject root)

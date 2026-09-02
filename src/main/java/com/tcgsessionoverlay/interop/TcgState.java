@@ -16,6 +16,7 @@ public final class TcgState
 	private final long totalCreditsGained;
 	private final long profileSavedAtUnix;
 	private final Map<Skill, Long> uncreditedXpBySkill;
+	private final Map<Skill, Long> baselineSkillXp;
 	private final List<OwnedCard> ownedCards;
 	private final int uniqueCardNames;
 	private final int foilCount;
@@ -26,17 +27,16 @@ public final class TcgState
 		long totalCreditsGained,
 		long profileSavedAtUnix,
 		Map<Skill, Long> uncreditedXpBySkill,
+		Map<Skill, Long> baselineSkillXp,
 		List<OwnedCard> ownedCards,
 		int uniqueCardNames)
 	{
-		Map<Skill, Long> uncreditedCopy = new EnumMap<>(Skill.class);
-		uncreditedCopy.putAll(uncreditedXpBySkill);
-
 		this.credits = credits;
 		this.openedPacks = openedPacks;
 		this.totalCreditsGained = totalCreditsGained;
 		this.profileSavedAtUnix = profileSavedAtUnix;
-		this.uncreditedXpBySkill = Collections.unmodifiableMap(uncreditedCopy);
+		this.uncreditedXpBySkill = copyOf(uncreditedXpBySkill);
+		this.baselineSkillXp = copyOf(baselineSkillXp);
 		this.ownedCards = Collections.unmodifiableList(new ArrayList<>(ownedCards));
 		this.uniqueCardNames = uniqueCardNames;
 
@@ -54,5 +54,22 @@ public final class TcgState
 	public long getUncreditedXp(Skill skill)
 	{
 		return uncreditedXpBySkill.getOrDefault(skill, 0L);
+	}
+
+	public boolean hasBaselineXp(Skill skill)
+	{
+		return baselineSkillXp.containsKey(skill);
+	}
+
+	public long getBaselineXp(Skill skill)
+	{
+		return baselineSkillXp.getOrDefault(skill, 0L);
+	}
+
+	private static Map<Skill, Long> copyOf(Map<Skill, Long> source)
+	{
+		Map<Skill, Long> copy = new EnumMap<>(Skill.class);
+		copy.putAll(source);
+		return Collections.unmodifiableMap(copy);
 	}
 }

@@ -23,7 +23,7 @@ public class TcgStateParserTest
 		+ "{\"id\":\"b\",\"foil\":true,\"pulledBy\":\"Player\",\"pulledAt\":1788092514019,\"beta\":true},"
 		+ "{\"id\":\"c\",\"pulledBy\":\"Player\",\"pulledAt\":1788092514020}]}],"
 		+ "\"skillCreditBaseline\":{"
-		+ "\"skillXp\":{\"Fishing\":101510},"
+		+ "\"skillXp\":{\"Fishing\":101510,\"Cooking\":64960},"
 		+ "\"uncreditedXpBySkill\":{\"Cooking\":890,\"Fishing\":500}}"
 		+ "}";
 
@@ -68,6 +68,18 @@ public class TcgStateParserTest
 		assertEquals(890L, state.getUncreditedXp(Skill.COOKING));
 		assertEquals(500L, state.getUncreditedXp(Skill.FISHING));
 		assertEquals(0L, state.getUncreditedXp(Skill.WOODCUTTING));
+	}
+
+	@Test
+	public void parsesBaselineSkillXp()
+	{
+		TcgState state = TcgStateParser.parse(SAMPLE).orElseThrow(AssertionError::new);
+
+		assertTrue(state.hasBaselineXp(Skill.FISHING));
+		assertEquals(101510L, state.getBaselineXp(Skill.FISHING));
+		assertEquals(64960L, state.getBaselineXp(Skill.COOKING));
+		assertFalse(state.hasBaselineXp(Skill.WOODCUTTING));
+		assertEquals(0L, state.getBaselineXp(Skill.WOODCUTTING));
 	}
 
 	@Test
