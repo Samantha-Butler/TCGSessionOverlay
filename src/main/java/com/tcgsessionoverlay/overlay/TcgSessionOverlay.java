@@ -1,5 +1,8 @@
 package com.tcgsessionoverlay.overlay;
 
+import com.tcgsessionoverlay.TcgSessionOverlayConfig;
+import com.tcgsessionoverlay.session.CreditsTracker;
+import com.tcgsessionoverlay.session.XpBlocks;
 import com.tcgsessionoverlay.session.XpCountdownTracker;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -12,14 +15,24 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.ProgressBarComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
+import net.runelite.client.util.QuantityFormatter;
 
 public class TcgSessionOverlay extends OverlayPanel
 {
+	private static final Color SECTION_COLOR = Color.ORANGE;
+
+	private final TcgSessionOverlayConfig config;
+	private final CreditsTracker creditsTracker;
 	private final XpCountdownTracker xpCountdownTracker;
 
 	@Inject
-	private TcgSessionOverlay(XpCountdownTracker xpCountdownTracker)
+	private TcgSessionOverlay(
+		TcgSessionOverlayConfig config,
+		CreditsTracker creditsTracker,
+		XpCountdownTracker xpCountdownTracker)
 	{
+		this.config = config;
+		this.creditsTracker = creditsTracker;
 		this.xpCountdownTracker = xpCountdownTracker;
 		setPosition(OverlayPosition.TOP_LEFT);
 		panelComponent.setGap(new Point(0, 4));
@@ -30,22 +43,50 @@ public class TcgSessionOverlay extends OverlayPanel
 	{
 		panelComponent.getChildren().add(TitleComponent.builder()
 			.text("TCG Session")
-			.color(Color.ORANGE)
+			.color(SECTION_COLOR)
 			.build());
 
+		renderCredits();
 		renderXpCountdown();
 
 		return super.render(graphics);
 	}
 
+	private void renderCredits()
+	{
+		if (!config.showCredits())
+		{
+			return;
+		}
+
+		addSection("Credits");
+
+		if (!creditsTracker.hasState())
+		{
+			panelComponent.getChildren().add(LineComponent.builder()
+				.left("Waiting for TCG data")
+				.leftColor(Color.LIGHT_GRAY)
+				.build());
+			return;
+		}
+
+		addLine("Balance", QuantityFormatter.formatNumber(creditsTracker.getCredits()));
+		addLine("This session", "+" + QuantityFormatter.formatNumber(creditsTracker.getSessionCreditsEarned()));
+		addLine("Packs affordable", QuantityFormatter.formatNumber(creditsTracker.getPacksAffordable()));
+		addLine("Next pack", QuantityFormatter.formatNumber(creditsTracker.getCreditsTowardNextPack())
+			+ " / " + QuantityFormatter.formatNumber(creditsTracker.getPackCost()));
+	}
+
 	private void renderXpCountdown()
 	{
+		addSection("XP Countdown");
+
 		Skill trackedSkill = xpCountdownTracker.getTrackedSkill();
 		if (trackedSkill == null)
 		{
-			panelComponent.getChildren().add(TitleComponent.builder()
-				.text("Waiting for XP")
-				.color(Color.LIGHT_GRAY)
+			panelComponent.getChildren().add(LineComponent.builder()
+				.left("Waiting for XP")
+				.leftColor(Color.LIGHT_GRAY)
 				.build());
 			return;
 		}
@@ -55,24 +96,34 @@ public class TcgSessionOverlay extends OverlayPanel
 			.build());
 
 		ProgressBarComponent progressBar = new ProgressBarComponent();
-		progressBar.setMaximum(1000);
+		progressBar.setMaximum(XpBlocks.BLOCK_SIZE);
 		progressBar.setValue(xpCountdownTracker.getXpInCurrentBlock());
 		progressBar.setLabelDisplayMode(ProgressBarComponent.LabelDisplayMode.FULL);
 		panelComponent.getChildren().add(progressBar);
 
 		int actionsRemaining = xpCountdownTracker.getActionsRemaining();
-		panelComponent.getChildren().add(LineComponent.builder()
-			.left("Actions left")
-			.right(actionsRemaining >= 0 ? String.valueOf(actionsRemaining) : "-")
-			.build());
+		addLine("Actions left", actionsRemaining >= 0 ? String.valueOf(actionsRemaining) : "-");
 
 		int medianXpPerAction = xpCountdownTracker.getMedianXpPerAction();
 		if (medianXpPerAction > 0)
 		{
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("Xp per action")
-				.right(String.valueOf(medianXpPerAction))
-				.build());
+			addLine("Xp per action", String.valueOf(medianXpPerAction));
 		}
+	}
+
+	private void addSection(String name)
+	{
+		panelComponent.getChildren().add(LineComponent.builder()
+			.left(name)
+			.leftColor(SECTION_COLOR)
+			.build());
+	}
+
+	private void addLine(String label, String value)
+	{
+		panelComponent.getChildren().add(LineComponent.builder()
+			.left(label)
+			.right(value)
+			.build());
 	}
 }
