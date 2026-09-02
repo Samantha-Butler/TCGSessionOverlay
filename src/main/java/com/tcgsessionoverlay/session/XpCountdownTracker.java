@@ -7,22 +7,54 @@ import java.util.Deque;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.Skill;
 import net.runelite.api.events.StatChanged;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.RuneScapeProfileChanged;
 
 @Singleton
 public class XpCountdownTracker
 {
 	private static final int BLOCK_SIZE = 1000;
 	private static final int SAMPLE_WINDOW = 10;
+	private static final String CONFIG_GROUP = "tcgsessionoverlay";
+	private static final String XP_IN_BLOCK_KEY = "xpInCurrentBlock";
 
+	private final ConfigManager configManager;
 	private final Map<Skill, Integer> lastKnownXp = new EnumMap<>(Skill.class);
 	private final Deque<Integer> recentActionXp = new ArrayDeque<>();
 
 	private int xpInCurrentBlock;
 	private Skill trackedSkill;
+
+	@Inject
+	public XpCountdownTracker(ConfigManager configManager)
+	{
+		this.configManager = configManager;
+	}
+
+	@Subscribe
+	public void onRuneScapeProfileChanged(RuneScapeProfileChanged event)
+	{
+		loadState();
+	}
+
+	private void loadState()
+	{
+		Integer saved = configManager.getRSProfileConfiguration(CONFIG_GROUP, XP_IN_BLOCK_KEY, Integer.class);
+		if (saved != null)
+		{
+			xpInCurrentBlock = saved;
+		}
+	}
+
+	private void saveState()
+	{
+		configManager.setRSProfileConfiguration(CONFIG_GROUP, XP_IN_BLOCK_KEY, xpInCurrentBlock);
+	}
 
 	@Subscribe
 	public void onStatChanged(StatChanged statChanged)
@@ -55,6 +87,7 @@ public class XpCountdownTracker
 		}
 
 		xpInCurrentBlock = (xpInCurrentBlock + gained) % BLOCK_SIZE;
+		saveState();
 	}
 
 	public int getXpInCurrentBlock()
