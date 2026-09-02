@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
@@ -23,12 +24,13 @@ import net.runelite.client.events.RuneScapeProfileChanged;
 public class TcgStateReader
 {
 	private static final String SAVE_FILE_NAME = "tcg.save";
-	private static final Duration CACHE_DURATION = Duration.ofSeconds(5);
+	private static final Duration CHECK_INTERVAL = Duration.ofSeconds(5);
 
 	private final Client client;
 
-	private Optional<String> cachedState = Optional.empty();
-	private Instant cachedAt = Instant.MIN;
+	private Optional<TcgState> cachedState = Optional.empty();
+	private Instant lastCheckedAt = Instant.MIN;
+	private FileTime lastModified;
 
 	@Inject
 	public TcgStateReader(Client client)
@@ -40,7 +42,8 @@ public class TcgStateReader
 	public void onRuneScapeProfileChanged(RuneScapeProfileChanged event)
 	{
 		cachedState = Optional.empty();
-		cachedAt = Instant.MIN;
+		lastCheckedAt = Instant.MIN;
+		lastModified = null;
 	}
 
 	@Subscribe
@@ -49,42 +52,55 @@ public class TcgStateReader
 		getState();
 	}
 
-	public Optional<String> getState()
+	public Optional<TcgState> getState()
 	{
 		Instant now = Instant.now();
-		if (cachedState.isPresent() && Duration.between(cachedAt, now).compareTo(CACHE_DURATION) < 0)
+		if (Duration.between(lastCheckedAt, now).compareTo(CHECK_INTERVAL) < 0)
 		{
 			return cachedState;
 		}
 
-		cachedState = readAndDecode();
-		cachedAt = now;
+		lastCheckedAt = now;
+		refreshIfChanged();
 		return cachedState;
 	}
 
-	private Optional<String> readAndDecode()
+	private void refreshIfChanged()
 	{
 		Path saveFile = resolveSaveFile();
 		if (saveFile == null || !Files.isRegularFile(saveFile))
 		{
-			log.debug("No osrs-tcg save file found for this account");
-			return Optional.empty();
+			cachedState = Optional.empty();
+			lastModified = null;
+			return;
 		}
 
 		try
 		{
-			String raw = Files.readString(saveFile, StandardCharsets.UTF_8);
-			Optional<String> decoded = TcgStateDecoder.decode(raw);
-			if (decoded.isPresent())
+			FileTime modified = Files.getLastModifiedTime(saveFile);
+			if (modified.equals(lastModified))
 			{
-				log.debug("Decoded osrs-tcg state: {}", decoded.get());
-			}
-			else
-			{
-				log.debug("osrs-tcg save file was present but could not be decoded");
+				return;
 			}
 
-			return decoded;
+			lastModified = modified;
+			cachedState = readAndParse(saveFile);
+		}
+		catch (IOException e)
+		{
+			log.debug("Failed to check osrs-tcg save file", e);
+		}
+	}
+
+	private Optional<TcgState> readAndParse(Path saveFile)
+	{
+		try
+		{
+			String raw = Files.readString(saveFile, StandardCharsets.UTF_8);
+			Optional<TcgState> parsed = TcgStateDecoder.decode(raw).flatMap(TcgStateParser::parse);
+			parsed.ifPresent(state -> log.debug("Read osrs-tcg state: credits={} packs={} cards={} foils={}",
+				state.getCredits(), state.getOpenedPacks(), state.getOwnedCards().size(), state.getFoilCount()));
+			return parsed;
 		}
 		catch (IOException e)
 		{
