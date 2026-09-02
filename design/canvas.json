@@ -1,0 +1,11 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1000, "h": 700, "title": "In-game placement" },
+    { "file": "Modules.dc.html", "x": 1100, "y": 0, "w": 1000, "h": 820, "title": "Module catalogue" },
+    { "file": "Appearance.dc.html", "x": 0, "y": 820, "w": 1000, "h": 520, "title": "Background opacity" }
+  ],
+  "annotations": [
+    { "id": "context-note", "x": 0, "y": -110, "w": 460, "text": "TCG Session overlay — mockups for a standalone RuneLite plugin (no coordination with osrs-tcg's author). Terrain/minimap/inventory are generic placeholders, not game art." }
+  ],
+  "launch": { "view": "canvas" }
+}

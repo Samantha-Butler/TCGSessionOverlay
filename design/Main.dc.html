@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Domine:wght@400;600;700&display=swap">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; }
+    a { color: #ffb04a; } a:hover { color: #ffc873; }
+  </style>
+</helmet>
+
+<div style="width:1000px;height:700px;position:relative;overflow:hidden;background:
+  radial-gradient(120% 90% at 20% 15%, #3c4a2e 0%, #26301c 45%, #171f11 100%);
+  font-family:'Domine',Georgia,serif;">
+
+  <!-- subtle terrain texture, stand-in for the game world -->
+  <div style="position:absolute;inset:0;opacity:0.5;background-image:
+    repeating-linear-gradient(115deg, rgba(255,255,255,0.02) 0 2px, transparent 2px 26px),
+    repeating-linear-gradient(25deg, rgba(0,0,0,0.10) 0 3px, transparent 3px 34px);"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:220px;background:
+    linear-gradient(to top, rgba(0,0,0,0.55), transparent);"></div>
+
+  <!-- caption -->
+  <div style="position:absolute;top:14px;left:50%;transform:translateX(-50%);
+    font-family:system-ui,sans-serif;font-size:11px;letter-spacing:0.06em;
+    color:rgba(255,255,255,0.4);text-transform:uppercase;">
+    Client viewport (placeholder terrain — not game art) · overlay position is configurable
+  </div>
+
+  <!-- minimap placeholder, top right, standard RuneLite location -->
+  <div style="position:absolute;top:36px;right:28px;width:146px;height:146px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #4a5a35, #23301a 70%);
+    border:3px solid #6b5a3a;box-shadow:0 0 0 2px #2b2318, inset 0 0 20px rgba(0,0,0,0.5);"></div>
+  <div style="position:absolute;top:26px;right:14px;width:26px;height:26px;border-radius:50%;
+    background:#2b2318;border:2px solid #6b5a3a;"></div>
+
+  <!-- inventory placeholder, bottom right -->
+  <div style="position:absolute;bottom:18px;right:24px;width:200px;height:250px;
+    background:rgba(20,16,10,0.82);border:2px solid #4a3a24;border-radius:4px;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px;">
+    <sc-for list="{{invSlots}}" as="slot" hint-placeholder-count="20">
+      <div style="aspect-ratio:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:2px;"></div>
+    </sc-for>
+  </div>
+
+  <!-- chatbox placeholder, bottom left -->
+  <div style="position:absolute;bottom:18px;left:24px;width:420px;height:150px;
+    background:rgba(20,16,10,0.82);border:2px solid #4a3a24;border-radius:4px;padding:10px;
+    font-family:system-ui,sans-serif;font-size:11px;color:rgba(255,255,255,0.25);line-height:1.9;">
+    <div style="width:78%;height:9px;background:rgba(255,255,255,0.08);border-radius:2px;margin-bottom:9px;"></div>
+    <div style="width:60%;height:9px;background:rgba(255,255,255,0.08);border-radius:2px;margin-bottom:9px;"></div>
+    <div style="width:70%;height:9px;background:rgba(255,255,255,0.08);border-radius:2px;"></div>
+  </div>
+
+  <!-- ================= EXPANDED OVERLAY ================= -->
+  <div style="position:absolute;top:40px;left:28px;width:238px;
+    background:rgba(0,0,0,0.72);border:1px solid rgba(255,255,255,0.09);border-radius:3px;
+    padding:8px 10px 10px;color:#eae6dc;font-size:12.5px;line-height:1.5;">
+
+    <!-- title bar -->
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff981f" stroke-width="2">
+        <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+        <path d="M8 4v16M8 8h4M8 12h6"></path>
+      </svg>
+      <div style="color:#ff981f;font-weight:700;font-size:12.5px;letter-spacing:0.02em;">TCG Session</div>
+    </div>
+
+    <!-- CREDITS -->
+    <div style="color:#ffb04a;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin:6px 0 3px;">Credits</div>
+    <div style="display:flex;justify-content:space-between;"><span>Balance</span><span style="color:#fff;">14,230</span></div>
+    <div style="display:flex;justify-content:space-between;"><span>This session</span><span style="color:#7ed77e;">+1,840</span></div>
+    <div style="display:flex;justify-content:space-between;"><span>Packs affordable</span><span style="color:#7ed77e;font-weight:700;">5</span></div>
+    <div style="margin-top:4px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(234,230,220,0.65);margin-bottom:2px;">
+        <span>Next pack</span><span>1,840 / 2,500</span>
+      </div>
+      <div style="height:8px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
+        <div style="width:74%;height:100%;background:linear-gradient(90deg,#e08a2e,#ffb04a);"></div>
+      </div>
+    </div>
+
+    <!-- divider -->
+    <div style="height:1px;background:rgba(255,255,255,0.08);margin:8px 0;"></div>
+
+    <!-- XP COUNTDOWN -->
+    <div style="display:flex;justify-content:space-between;align-items:baseline;">
+      <span style="color:#ffb04a;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">XP Countdown</span>
+      <span style="font-size:10.5px;color:rgba(234,230,220,0.55);">Woodcutting</span>
+    </div>
+    <div style="margin-top:4px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(234,230,220,0.65);margin-bottom:2px;">
+        <span>420 / 1,000 xp</span><span>~6 actions left</span>
+      </div>
+      <div style="height:8px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
+        <div style="width:42%;height:100%;background:linear-gradient(90deg,#3f7fd1,#5fa8ff);"></div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:3px;font-size:11px;color:rgba(234,230,220,0.55);">
+      <span>~91 xp / action (median)</span>
+    </div>
+
+    <!-- divider -->
+    <div style="height:1px;background:rgba(255,255,255,0.08);margin:8px 0;"></div>
+
+    <!-- RATES -->
+    <div style="color:#ffb04a;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Rates</div>
+    <div style="display:flex;justify-content:space-between;"><span>Credits / hr</span><span style="color:#fff;">1,240</span></div>
+    <div style="display:flex;justify-content:space-between;"><span>Session time</span><span style="color:#fff;">1h 24m</span></div>
+  </div>
+
+  <div style="position:absolute;top:22px;left:28px;font-family:system-ui,sans-serif;font-size:10.5px;
+    color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.05em;">Expanded</div>
+
+  <!-- ================= COMPACT OVERLAY ================= -->
+  <div style="position:absolute;top:210px;left:28px;
+    background:rgba(0,0,0,0.72);border:1px solid rgba(255,255,255,0.09);border-radius:3px;
+    padding:6px 10px;color:#eae6dc;font-size:12.5px;display:flex;align-items:center;gap:10px;white-space:nowrap;">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ff981f" stroke-width="2">
+      <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+      <path d="M8 4v16M8 8h4M8 12h6"></path>
+    </svg>
+    <span style="color:#fff;">14,230cr</span>
+    <span style="color:#7ed77e;">+1,840</span>
+    <span style="color:rgba(234,230,220,0.35);">|</span>
+    <span>Pack: <span style="color:#ffb04a;">660cr</span></span>
+    <span style="color:rgba(234,230,220,0.35);">|</span>
+    <span>XP <span style="color:#5fa8ff;">420/1000</span></span>
+    <span style="color:rgba(234,230,220,0.35);">|</span>
+    <span style="color:#fff;">1,240cr/hr</span>
+  </div>
+
+  <div style="position:absolute;top:192px;left:28px;font-family:system-ui,sans-serif;font-size:10.5px;
+    color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.05em;">Compact — one line, same data</div>
+
+  <!-- affordable-pack callout -->
+  <div style="position:absolute;top:265px;left:28px;max-width:260px;font-family:system-ui,sans-serif;
+    font-size:10.5px;color:rgba(255,255,255,0.45);line-height:1.5;">
+    Green marks a configurable threshold (e.g. a pack becomes affordable). Every line above is a
+    separate on/off toggle in the config panel — a user showing only the XP countdown sees a
+    two-line overlay, not this whole block.
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

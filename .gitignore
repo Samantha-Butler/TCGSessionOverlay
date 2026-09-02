@@ -1,0 +1,12 @@
+.gradle
+build
+.idea/
+.project
+.settings/
+.classpath
+nbactions.xml
+nb-configuration.xml
+nbproject/
+
+# generated design-canvas payload (~2.5MB editor bundle) — source is the .dc.html files, this is a build output
+design/tcg-overlay-mockups.html

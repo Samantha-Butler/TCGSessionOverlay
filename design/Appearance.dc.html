@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Domine:wght@400;600;700&display=swap">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; }
+    a { color: #ffb04a; } a:hover { color: #ffc873; }
+  </style>
+</helmet>
+
+<div style="width:1000px;background:#f4f1ea;padding:40px 44px 56px;">
+
+  <div style="font-family:'Domine',Georgia,serif;font-weight:700;font-size:22px;color:#171f11;margin-bottom:2px;">
+    Background opacity
+  </div>
+  <div style="font-family:system-ui,sans-serif;font-size:12.5px;color:rgba(20,20,20,0.55);margin-bottom:26px;max-width:640px;">
+    One <code style="background:rgba(0,0,0,0.06);padding:1px 5px;border-radius:3px;">@Alpha</code>-backed slider in
+    Appearance controls the panel background from fully opaque to fully see-through. Text keeps a drop shadow at
+    every setting so it stays readable with nothing behind it.
+  </div>
+
+  <!-- config slider mockup -->
+  <div style="max-width:420px;margin-bottom:34px;background:#fff;border:1px solid rgba(0,0,0,0.08);
+    border-radius:5px;padding:14px 16px;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;
+      font-family:system-ui,sans-serif;">
+      <span style="font-size:12.5px;color:#171f11;font-weight:600;">Background opacity</span>
+      <span style="font-size:12px;color:rgba(20,20,20,0.5);">70%</span>
+    </div>
+    <div style="position:relative;height:4px;background:rgba(0,0,0,0.1);border-radius:2px;">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:70%;background:#e08a2e;border-radius:2px;"></div>
+      <div style="position:absolute;left:70%;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;
+        border-radius:50%;background:#fff;border:2px solid #e08a2e;box-shadow:0 1px 3px rgba(0,0,0,0.25);"></div>
+    </div>
+  </div>
+
+  <!-- swatches over a game-like strip -->
+  <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:28px;">
+
+    <sc-for list="{{stops}}" as="s" hint-placeholder-count="4">
+      <div>
+        <div style="position:relative;height:150px;border-radius:4px;overflow:hidden;background:
+          radial-gradient(120% 90% at 25% 20%, #3c4a2e 0%, #26301c 45%, #171f11 100%);">
+          <div style="position:absolute;inset:0;opacity:0.5;background-image:
+            repeating-linear-gradient(115deg, rgba(255,255,255,0.03) 0 2px, transparent 2px 24px);"></div>
+          <div style="position:absolute;top:14px;left:14px;width:150px;
+            background:{{s.bg}};border:{{s.border}};border-radius:3px;padding:7px 9px 8px;
+            font-family:'Domine',Georgia,serif;color:#eae6dc;font-size:11px;line-height:1.5;
+            text-shadow:0 1px 2px rgba(0,0,0,0.85);">
+            <div style="color:#ffb04a;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Credits</div>
+            <div style="display:flex;justify-content:space-between;"><span>Balance</span><span style="color:#fff;">14,230</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>Session</span><span style="color:#7ed77e;">+1,840</span></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-family:system-ui,sans-serif;">
+          <div style="font-size:12px;font-weight:600;color:#171f11;">{{s.label}}</div>
+          <div style="font-size:11px;color:rgba(20,20,20,0.5);">{{s.desc}}</div>
+        </div>
+      </div>
+    </sc-for>
+
+  </div>
+</div>
+</x-dc>
+<script data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      stops: [
+        { label: '100% — Opaque', desc: 'Solid panel, easiest to read', bg: 'rgba(0,0,0,1)', border: '1px solid rgba(255,255,255,0.12)' },
+        { label: '70% — Default', desc: "Ships as the plugin's default", bg: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.09)' },
+        { label: '35% — Low', desc: 'Terrain shows through clearly', bg: 'rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.06)' },
+        { label: '0% — Transparent', desc: 'No panel at all, text only', bg: 'rgba(0,0,0,0)', border: '1px solid transparent' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

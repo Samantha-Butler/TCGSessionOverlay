@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Domine:wght@400;600;700&display=swap">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; }
+    a { color: #ffb04a; } a:hover { color: #ffc873; }
+    .panel {
+      background: rgba(20,16,10,0.94); border: 1px solid rgba(255,255,255,0.09); border-radius: 3px;
+      padding: 8px 10px 10px; color: #eae6dc; font-size: 12.5px; line-height: 1.5;
+      font-family: 'Domine', Georgia, serif; width: 260px;
+    }
+    .head { color: #ffb04a; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+    .row { display:flex; justify-content:space-between; }
+    .bar-track { height: 7px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; margin-top: 3px; }
+    .bar-fill { height: 100%; }
+    .caption { font-family: system-ui, sans-serif; font-size: 11.5px; color: rgba(20,20,20,0.72); line-height: 1.5; margin-top: 10px; max-width: 260px; }
+    .caption b { color: #171f11; }
+  </style>
+</helmet>
+
+<div style="width:1000px;background:#f4f1ea;padding:40px 44px 56px;">
+
+  <div style="font-family:'Domine',Georgia,serif;font-weight:700;font-size:22px;color:#171f11;margin-bottom:2px;">
+    Module catalogue
+  </div>
+  <div style="font-family:system-ui,sans-serif;font-size:12.5px;color:rgba(20,20,20,0.55);margin-bottom:28px;">
+    Every module below is independently toggleable and independently positioned within the overlay. Modules marked
+    <span style="color:#3f7fd1;font-weight:600;">no-data-needed</span> work with zero OSRS TCG integration.
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3, 260px);gap:40px 44px;">
+
+    <!-- 1. Credits -->
+    <div>
+      <div class="panel">
+        <div class="head">Credits</div>
+        <div class="row"><span>Balance</span><span style="color:#fff;">14,230</span></div>
+        <div class="row"><span>This session</span><span style="color:#7ed77e;">+1,840</span></div>
+        <div class="row"><span>Packs affordable</span><span style="color:#7ed77e;font-weight:700;">5</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:74%;background:linear-gradient(90deg,#e08a2e,#ffb04a);"></div></div>
+      </div>
+      <div class="caption"><b>Credits</b> — balance, session earnings, progress to next 2,500cr pack.</div>
+    </div>
+
+    <!-- 2. XP Countdown -->
+    <div>
+      <div class="panel">
+        <div class="row"><span class="head" style="margin:0;">XP Countdown</span><span style="font-size:10.5px;color:rgba(234,230,220,0.55);">Woodcutting</span></div>
+        <div class="row" style="font-size:11px;color:rgba(234,230,220,0.7);"><span>420 / 1,000 xp</span><span>~6 actions left</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:42%;background:linear-gradient(90deg,#3f7fd1,#5fa8ff);"></div></div>
+        <div style="font-size:11px;color:rgba(234,230,220,0.55);margin-top:3px;">~91 xp / action (median)</div>
+      </div>
+      <div class="caption"><b>XP Countdown</b> — the anchor module. <span style="color:#3f7fd1;font-weight:600;">no-data-needed</span>, derives actions-remaining from observed StatChanged deltas.</div>
+    </div>
+
+    <!-- 3. Rates -->
+    <div>
+      <div class="panel">
+        <div class="head">Rates</div>
+        <div class="row"><span>Credits / hr</span><span style="color:#fff;">1,240</span></div>
+        <div class="row"><span>XP / hr</span><span style="color:#5fa8ff;">12,400</span></div>
+        <div class="row"><span>Session time</span><span style="color:#fff;">1h 24m</span></div>
+      </div>
+      <div class="caption"><b>Rates</b> — XP-derived rate is <span style="color:#3f7fd1;font-weight:600;">no-data-needed</span>; overall cr/hr needs kill + level-up observation.</div>
+    </div>
+
+    <!-- 4. Next level-up -->
+    <div>
+      <div class="panel">
+        <div class="head">Next Level-Up</div>
+        <div class="row"><span>Woodcutting 41 → 42</span></div>
+        <div class="row" style="font-size:11px;color:rgba(234,230,220,0.7);"><span>3,140 / 8,900 xp</span><span>35%</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:35%;background:linear-gradient(90deg,#9a6fd1,#c79bff);"></div></div>
+        <div class="row" style="margin-top:4px;"><span>Award</span><span style="color:#ffb04a;">~1,780cr (0.7 packs)</span></div>
+      </div>
+      <div class="caption"><b>Next Level-Up</b> — only shown for exact published levels; the award table is too sparse to interpolate.</div>
+    </div>
+
+    <!-- 5. Pulls this session -->
+    <div>
+      <div class="panel">
+        <div class="head">Pulls This Session</div>
+        <div class="row"><span>Packs opened</span><span style="color:#fff;">3</span></div>
+        <div class="row"><span>Cards pulled</span><span style="color:#fff;">15</span></div>
+        <div class="row"><span>New uniques</span><span style="color:#7ed77e;">4</span></div>
+        <div class="row"><span>Foils</span><span style="color:#ffd166;">1</span></div>
+        <div class="row"><span>Best pull</span><span style="color:#ffd166;">Foil · Rare</span></div>
+      </div>
+      <div class="caption"><b>Pulls This Session</b> — counts and rarity only, per the "no card value in GP" rule.</div>
+    </div>
+
+    <!-- 6. All-time -->
+    <div>
+      <div class="panel">
+        <div class="head">All-Time</div>
+        <div class="row"><span>Uniques</span><span style="color:#fff;">842 / 6,300</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:13%;background:linear-gradient(90deg,#e08a2e,#ffb04a);"></div></div>
+        <div class="row" style="margin-top:4px;"><span>Foils owned</span><span style="color:#ffd166;">6</span></div>
+        <div class="row"><span>Packs since last foil</span><span style="color:#fff;">28</span></div>
+      </div>
+      <div class="caption"><b>All-Time</b> — lifetime collection stats read from the same decoded state.</div>
+    </div>
+
+    <!-- 7. Combat credits -->
+    <div>
+      <div class="panel">
+        <div class="head">Combat Credits</div>
+        <div class="row"><span>This session</span><span style="color:#e08a8a;">180cr</span></div>
+        <div class="row"><span>Per hour</span><span style="color:#fff;">128cr</span></div>
+        <div class="row"><span>Last kill</span><span style="color:#fff;">Hill Giant · 28cr</span></div>
+      </div>
+      <div class="caption"><b>Combat Credits</b> — kept separate from XP credits; different formula (NPC combat level).</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
