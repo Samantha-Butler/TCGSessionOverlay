@@ -25,7 +25,6 @@ import net.runelite.client.events.RuneScapeProfileChanged;
 @Singleton
 public class XpCountdownTracker
 {
-	private static final int BLOCK_SIZE = 1000;
 	private static final int SAMPLE_WINDOW = 10;
 	private static final String CONFIG_GROUP = "tcgsessionoverlay";
 	private static final String XP_IN_BLOCK_KEY = "xpInBlockBySkill";
@@ -102,19 +101,13 @@ public class XpCountdownTracker
 				continue;
 			}
 
-			xpInBlockBySkill.put(skill, anchoredBlockXp(
+			xpInBlockBySkill.put(skill, XpBlocks.xpIntoBlock(
 				saved.getUncreditedXp(skill),
 				saved.getBaselineXp(skill),
 				client.getSkillExperience(skill)));
 		}
 
 		saveState();
-	}
-
-	static int anchoredBlockXp(long savedCarry, long savedSkillXp, long currentSkillXp)
-	{
-		long xpSinceSave = currentSkillXp - savedSkillXp;
-		return (int) Math.floorMod(savedCarry + xpSinceSave, (long) BLOCK_SIZE);
 	}
 
 	@Subscribe
@@ -147,7 +140,7 @@ public class XpCountdownTracker
 			recentActionXp.removeFirst();
 		}
 
-		int updatedBlockXp = (xpInBlockBySkill.getOrDefault(skill, 0) + gained) % BLOCK_SIZE;
+		int updatedBlockXp = (xpInBlockBySkill.getOrDefault(skill, 0) + gained) % XpBlocks.BLOCK_SIZE;
 		xpInBlockBySkill.put(skill, updatedBlockXp);
 		saveState();
 	}
@@ -164,7 +157,7 @@ public class XpCountdownTracker
 
 	public int getXpRemainingInBlock()
 	{
-		return BLOCK_SIZE - getXpInCurrentBlock();
+		return XpBlocks.BLOCK_SIZE - getXpInCurrentBlock();
 	}
 
 	public Skill getTrackedSkill()
