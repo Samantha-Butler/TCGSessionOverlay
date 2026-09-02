@@ -1,0 +1,56 @@
+package com.tcgsessionoverlay.session;
+
+import java.util.EnumMap;
+import java.util.Map;
+import javax.inject.Singleton;
+import net.runelite.api.Skill;
+import net.runelite.api.events.StatChanged;
+import net.runelite.client.eventbus.Subscribe;
+
+@Singleton
+public class XpCountdownTracker
+{
+	private static final int BLOCK_SIZE = 1000;
+
+	private final Map<Skill, Integer> lastKnownXp = new EnumMap<>(Skill.class);
+
+	private int xpInCurrentBlock;
+	private Skill lastSkillGained;
+
+	@Subscribe
+	public void onStatChanged(StatChanged statChanged)
+	{
+		Skill skill = statChanged.getSkill();
+		int currentXp = statChanged.getXp();
+		Integer previousXp = lastKnownXp.put(skill, currentXp);
+
+		if (previousXp == null)
+		{
+			return;
+		}
+
+		int gained = currentXp - previousXp;
+		if (gained <= 0)
+		{
+			return;
+		}
+
+		lastSkillGained = skill;
+		xpInCurrentBlock = (xpInCurrentBlock + gained) % BLOCK_SIZE;
+	}
+
+	public int getXpInCurrentBlock()
+	{
+		return xpInCurrentBlock;
+	}
+
+	public int getXpRemainingInBlock()
+	{
+		return BLOCK_SIZE - xpInCurrentBlock;
+	}
+
+	public Skill getLastSkillGained()
+	{
+		return lastSkillGained;
+	}
+}
