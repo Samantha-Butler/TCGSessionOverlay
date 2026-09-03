@@ -7,20 +7,26 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Skill;
 
 @Slf4j
-public final class TcgStateParser
+@Singleton
+public class TcgStateParser
 {
-	private static final Gson GSON = new Gson();
 	private static final Map<String, Skill> SKILLS_BY_NAME = skillsByName();
 
-	private TcgStateParser()
+	private final Gson gson;
+
+	@Inject
+	public TcgStateParser(Gson gson)
 	{
+		this.gson = gson;
 	}
 
-	public static Optional<TcgState> parse(String json)
+	public Optional<TcgState> parse(String json)
 	{
 		if (json == null || json.isEmpty())
 		{
@@ -29,7 +35,7 @@ public final class TcgStateParser
 
 		try
 		{
-			JsonObject root = GSON.fromJson(json, JsonObject.class);
+			JsonObject root = gson.fromJson(json, JsonObject.class);
 			if (root == null)
 			{
 				return Optional.empty();

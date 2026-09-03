@@ -2,6 +2,7 @@ package com.tcgsessionoverlay.interop;
 
 import java.util.Optional;
 import net.runelite.api.Skill;
+import net.runelite.http.api.RuneLiteAPI;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -27,16 +28,18 @@ public class TcgStateParserTest
 		+ "\"uncreditedXpBySkill\":{\"Cooking\":890,\"Fishing\":500}}"
 		+ "}";
 
+	private final TcgStateParser parser = new TcgStateParser(RuneLiteAPI.GSON);
+
 	@Test
 	public void ignoresCollectionFieldsItDoesNotUse()
 	{
-		assertTrue(TcgStateParser.parse(SAMPLE).isPresent());
+		assertTrue(parser.parse(SAMPLE).isPresent());
 	}
 
 	@Test
 	public void parsesEconomyFields()
 	{
-		TcgState state = TcgStateParser.parse(SAMPLE).orElseThrow(AssertionError::new);
+		TcgState state = parser.parse(SAMPLE).orElseThrow(AssertionError::new);
 
 		assertEquals(4640L, state.getCredits());
 		assertEquals(196040L, state.getTotalCreditsGained());
@@ -46,7 +49,7 @@ public class TcgStateParserTest
 	@Test
 	public void parsesUncreditedXpPerSkill()
 	{
-		TcgState state = TcgStateParser.parse(SAMPLE).orElseThrow(AssertionError::new);
+		TcgState state = parser.parse(SAMPLE).orElseThrow(AssertionError::new);
 
 		assertEquals(890L, state.getUncreditedXp(Skill.COOKING));
 		assertEquals(500L, state.getUncreditedXp(Skill.FISHING));
@@ -56,7 +59,7 @@ public class TcgStateParserTest
 	@Test
 	public void parsesBaselineSkillXp()
 	{
-		TcgState state = TcgStateParser.parse(SAMPLE).orElseThrow(AssertionError::new);
+		TcgState state = parser.parse(SAMPLE).orElseThrow(AssertionError::new);
 
 		assertTrue(state.hasBaselineXp(Skill.FISHING));
 		assertEquals(101510L, state.getBaselineXp(Skill.FISHING));
@@ -68,15 +71,15 @@ public class TcgStateParserTest
 	@Test
 	public void returnsEmptyForUnparsableInput()
 	{
-		assertFalse(TcgStateParser.parse(null).isPresent());
-		assertFalse(TcgStateParser.parse("").isPresent());
-		assertFalse(TcgStateParser.parse("not json").isPresent());
+		assertFalse(parser.parse(null).isPresent());
+		assertFalse(parser.parse("").isPresent());
+		assertFalse(parser.parse("not json").isPresent());
 	}
 
 	@Test
 	public void toleratesMissingFields()
 	{
-		Optional<TcgState> parsed = TcgStateParser.parse("{\"credits\":10}");
+		Optional<TcgState> parsed = parser.parse("{\"credits\":10}");
 
 		assertTrue(parsed.isPresent());
 		assertEquals(10L, parsed.get().getCredits());

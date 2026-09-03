@@ -27,15 +27,17 @@ public class TcgStateReader
 	private static final Duration CHECK_INTERVAL = Duration.ofSeconds(5);
 
 	private final Client client;
+	private final TcgStateParser parser;
 
 	private Optional<TcgState> cachedState = Optional.empty();
 	private Instant lastCheckedAt = Instant.MIN;
 	private FileTime lastModified;
 
 	@Inject
-	public TcgStateReader(Client client)
+	public TcgStateReader(Client client, TcgStateParser parser)
 	{
 		this.client = client;
+		this.parser = parser;
 	}
 
 	@Subscribe
@@ -97,7 +99,7 @@ public class TcgStateReader
 		try
 		{
 			String raw = Files.readString(saveFile, StandardCharsets.UTF_8);
-			Optional<TcgState> parsed = TcgStateDecoder.decode(raw).flatMap(TcgStateParser::parse);
+			Optional<TcgState> parsed = TcgStateDecoder.decode(raw).flatMap(parser::parse);
 			parsed.ifPresent(state -> log.debug("Read osrs-tcg state: credits={} lifetime={} savedAt={}",
 				state.getCredits(), state.getTotalCreditsGained(), state.getProfileSavedAtUnix()));
 			return parsed;
