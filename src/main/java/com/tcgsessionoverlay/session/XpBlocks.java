@@ -2,20 +2,28 @@ package com.tcgsessionoverlay.session;
 
 public final class XpBlocks
 {
-	public static final int BLOCK_SIZE = 1000;
-
 	private XpBlocks()
 	{
 	}
 
-	public static int xpIntoBlock(long anchorCarry, long anchorSkillXp, long currentSkillXp)
+	public static int xpIntoBlock(long anchorCarry, long anchorSkillXp, long currentSkillXp, int xpPerBlock)
 	{
-		return (int) Math.floorMod(accumulatedXp(anchorCarry, anchorSkillXp, currentSkillXp), (long) BLOCK_SIZE);
+		if (xpPerBlock <= 0)
+		{
+			return 0;
+		}
+
+		return (int) Math.floorMod(accumulatedXp(anchorCarry, anchorSkillXp, currentSkillXp), (long) xpPerBlock);
 	}
 
-	public static int blocksCompleted(long anchorCarry, long anchorSkillXp, long currentSkillXp)
+	public static int blocksCompleted(long anchorCarry, long anchorSkillXp, long currentSkillXp, int xpPerBlock)
 	{
-		long blocks = Math.floorDiv(accumulatedXp(anchorCarry, anchorSkillXp, currentSkillXp), (long) BLOCK_SIZE);
+		if (xpPerBlock <= 0)
+		{
+			return 0;
+		}
+
+		long blocks = Math.floorDiv(accumulatedXp(anchorCarry, anchorSkillXp, currentSkillXp), (long) xpPerBlock);
 		return (int) Math.max(0L, blocks);
 	}
 

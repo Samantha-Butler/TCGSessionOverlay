@@ -101,10 +101,17 @@ public class XpCountdownTracker
 				continue;
 			}
 
+			CreditRule rule = CreditRule.forSkill(skill);
+			if (!rule.earnsCredits())
+			{
+				continue;
+			}
+
 			xpInBlockBySkill.put(skill, XpBlocks.xpIntoBlock(
 				saved.getUncreditedXp(skill),
 				saved.getBaselineXp(skill),
-				client.getSkillExperience(skill)));
+				client.getSkillExperience(skill),
+				rule.getXpPerBlock()));
 		}
 
 		saveState();
@@ -140,7 +147,13 @@ public class XpCountdownTracker
 			recentActionXp.removeFirst();
 		}
 
-		int updatedBlockXp = (xpInBlockBySkill.getOrDefault(skill, 0) + gained) % XpBlocks.BLOCK_SIZE;
+		CreditRule rule = CreditRule.forSkill(skill);
+		if (!rule.earnsCredits())
+		{
+			return;
+		}
+
+		int updatedBlockXp = (xpInBlockBySkill.getOrDefault(skill, 0) + gained) % rule.getXpPerBlock();
 		xpInBlockBySkill.put(skill, updatedBlockXp);
 		saveState();
 	}
@@ -155,9 +168,19 @@ public class XpCountdownTracker
 		return xpInBlockBySkill.getOrDefault(trackedSkill, 0);
 	}
 
+	public int getBlockSize()
+	{
+		return CreditRule.forSkill(trackedSkill).getXpPerBlock();
+	}
+
+	public boolean isTrackedSkillEarningCredits()
+	{
+		return CreditRule.forSkill(trackedSkill).earnsCredits();
+	}
+
 	public int getXpRemainingInBlock()
 	{
-		return XpBlocks.BLOCK_SIZE - getXpInCurrentBlock();
+		return getBlockSize() - getXpInCurrentBlock();
 	}
 
 	public Skill getTrackedSkill()
@@ -187,7 +210,7 @@ public class XpCountdownTracker
 	public int getActionsRemaining()
 	{
 		int medianXp = getMedianXpPerAction();
-		if (medianXp <= 0)
+		if (medianXp <= 0 || getBlockSize() <= 0)
 		{
 			return -1;
 		}

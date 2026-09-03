@@ -3,7 +3,6 @@ package com.tcgsessionoverlay.overlay;
 import com.tcgsessionoverlay.TcgSessionOverlayConfig;
 import com.tcgsessionoverlay.session.CreditsTracker;
 import com.tcgsessionoverlay.session.RatesTracker;
-import com.tcgsessionoverlay.session.XpBlocks;
 import com.tcgsessionoverlay.session.XpCountdownTracker;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -117,8 +116,13 @@ public class TcgSessionOverlay extends OverlayPanel
 			.left(trackedSkill.getName())
 			.build());
 
+		if (!xpCountdownTracker.isTrackedSkillEarningCredits())
+		{
+			return;
+		}
+
 		ProgressBarComponent progressBar = new ProgressBarComponent();
-		progressBar.setMaximum(XpBlocks.BLOCK_SIZE);
+		progressBar.setMaximum(xpCountdownTracker.getBlockSize());
 		progressBar.setValue(xpCountdownTracker.getXpInCurrentBlock());
 		progressBar.setLabelDisplayMode(ProgressBarComponent.LabelDisplayMode.FULL);
 		panelComponent.getChildren().add(progressBar);

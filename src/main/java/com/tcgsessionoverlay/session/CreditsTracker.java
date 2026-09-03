@@ -17,8 +17,6 @@ import net.runelite.client.events.RuneScapeProfileChanged;
 @Singleton
 public class CreditsTracker
 {
-	public static final int CREDITS_PER_BLOCK = 100;
-
 	private final Client client;
 	private final TcgSessionOverlayConfig config;
 	private final TcgStateReader tcgStateReader;
@@ -63,11 +61,18 @@ public class CreditsTracker
 				continue;
 			}
 
+			CreditRule rule = CreditRule.forSkill(skill);
+			if (!rule.earnsCredits())
+			{
+				continue;
+			}
+
 			long currentSkillXp = client.getSkillExperience(skill);
 			sessionCarryBySkill.put(skill, (long) XpBlocks.xpIntoBlock(
 				saved.getUncreditedXp(skill),
 				saved.getBaselineXp(skill),
-				currentSkillXp));
+				currentSkillXp,
+				rule.getXpPerBlock()));
 			sessionSkillXpBySkill.put(skill, currentSkillXp);
 		}
 
@@ -88,12 +93,12 @@ public class CreditsTracker
 			return 0L;
 		}
 
-		return state.get().getCredits() + (long) CREDITS_PER_BLOCK * blocksSinceSave(state.get());
+		return state.get().getCredits() + creditsSinceSave(state.get());
 	}
 
 	public long getSessionCreditsEarned()
 	{
-		return (long) CREDITS_PER_BLOCK * blocksSinceSessionStart();
+		return creditsSinceSessionStart();
 	}
 
 	public long getOpenedPacks()
@@ -126,34 +131,42 @@ public class CreditsTracker
 		return getPackCost() - getCreditsTowardNextPack();
 	}
 
-	private int blocksSinceSave(TcgState saved)
+	private long creditsSinceSave(TcgState saved)
 	{
-		int blocks = 0;
+		long credits = 0L;
 		for (Skill skill : Skill.values())
 		{
-			if (saved.hasBaselineXp(skill))
+			CreditRule rule = CreditRule.forSkill(skill);
+			if (!rule.earnsCredits() || !saved.hasBaselineXp(skill))
 			{
-				blocks += XpBlocks.blocksCompleted(
-					saved.getUncreditedXp(skill),
-					saved.getBaselineXp(skill),
-					client.getSkillExperience(skill));
+				continue;
 			}
+
+			credits += (long) rule.getCreditsPerBlock() * XpBlocks.blocksCompleted(
+				saved.getUncreditedXp(skill),
+				saved.getBaselineXp(skill),
+				client.getSkillExperience(skill),
+				rule.getXpPerBlock());
 		}
 
-		return blocks;
+		return credits;
 	}
 
-	private int blocksSinceSessionStart()
+	private long creditsSinceSessionStart()
 	{
-		int blocks = 0;
+		long credits = 0L;
 		for (Map.Entry<Skill, Long> entry : sessionSkillXpBySkill.entrySet())
 		{
-			blocks += XpBlocks.blocksCompleted(
-				sessionCarryBySkill.get(entry.getKey()),
+			Skill skill = entry.getKey();
+			CreditRule rule = CreditRule.forSkill(skill);
+
+			credits += (long) rule.getCreditsPerBlock() * XpBlocks.blocksCompleted(
+				sessionCarryBySkill.get(skill),
 				entry.getValue(),
-				client.getSkillExperience(entry.getKey()));
+				client.getSkillExperience(skill),
+				rule.getXpPerBlock());
 		}
 
-		return blocks;
+		return credits;
 	}
 }
