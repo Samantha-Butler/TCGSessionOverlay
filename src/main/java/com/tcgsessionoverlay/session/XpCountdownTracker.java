@@ -15,6 +15,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.Client;
+import net.runelite.api.Experience;
 import net.runelite.api.Skill;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.StatChanged;
@@ -176,6 +177,16 @@ public class XpCountdownTracker
 	public boolean isTrackedSkillEarningCredits()
 	{
 		return CreditRule.forSkill(trackedSkill).earnsCredits();
+	}
+
+	public int getNextLevelCredits()
+	{
+		if (trackedSkill == null)
+		{
+			return 0;
+		}
+
+		return LevelUpCredits.forLevel(Experience.getLevelForXp(client.getSkillExperience(trackedSkill)) + 1);
 	}
 
 	public int getXpRemainingInBlock()

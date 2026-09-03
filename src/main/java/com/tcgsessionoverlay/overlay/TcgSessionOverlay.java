@@ -118,6 +118,7 @@ public class TcgSessionOverlay extends OverlayPanel
 
 		if (!xpCountdownTracker.isTrackedSkillEarningCredits())
 		{
+			addLine("Level up credits", QuantityFormatter.formatNumber(xpCountdownTracker.getNextLevelCredits()));
 			return;
 		}
 
