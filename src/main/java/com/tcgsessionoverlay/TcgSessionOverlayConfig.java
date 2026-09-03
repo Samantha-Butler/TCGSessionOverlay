@@ -65,24 +65,12 @@ public interface TcgSessionOverlayConfig extends Config
 		return 2500;
 	}
 
-	@ConfigItem(
-		keyName = "compactMode",
-		name = "Compact mode",
-		description = "Show everything on one line instead of separate sections.",
-		position = 81,
-		section = appearanceSection
-	)
-	default boolean compactMode()
-	{
-		return false;
-	}
-
 	@Alpha
 	@ConfigItem(
 		keyName = "backgroundColor",
 		name = "Background",
 		description = "Overlay background colour. Drag the alpha slider left to make the panel more transparent.",
-		position = 82,
+		position = 81,
 		section = appearanceSection
 	)
 	default Color backgroundColor()
@@ -94,7 +82,7 @@ public interface TcgSessionOverlayConfig extends Config
 		keyName = "numberStyle",
 		name = "Number format",
 		description = "Full shows 199,982. Short shows 199.9K.",
-		position = 83,
+		position = 82,
 		section = appearanceSection
 	)
 	default NumberStyle numberStyle()
