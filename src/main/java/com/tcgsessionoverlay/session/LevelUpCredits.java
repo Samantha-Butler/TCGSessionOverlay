@@ -32,6 +32,26 @@ public final class LevelUpCredits
 		return (int) Math.round(FLOOR * multiplier);
 	}
 
+	public static long between(long fromSkillXp, long toSkillXp)
+	{
+		int fromLevel = levelForXp(fromSkillXp);
+		int toLevel = levelForXp(toSkillXp);
+
+		long total = 0L;
+		for (int level = fromLevel + 1; level <= toLevel; level++)
+		{
+			total += forLevel(level);
+		}
+
+		return total;
+	}
+
+	static int levelForXp(long skillXp)
+	{
+		long bounded = Math.max(0L, Math.min(skillXp, Experience.MAX_SKILL_XP));
+		return Experience.getLevelForXp((int) bounded);
+	}
+
 	private static int clampLevel(int level)
 	{
 		return level < 1 ? 1 : Math.min(level, Experience.MAX_VIRT_LEVEL);

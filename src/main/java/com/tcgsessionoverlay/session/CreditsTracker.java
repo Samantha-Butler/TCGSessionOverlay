@@ -61,19 +61,20 @@ public class CreditsTracker
 				continue;
 			}
 
+			long currentSkillXp = client.getSkillExperience(skill);
+			sessionSkillXpBySkill.put(skill, currentSkillXp);
+
 			CreditRule rule = CreditRule.forSkill(skill);
 			if (!rule.earnsCredits())
 			{
 				continue;
 			}
 
-			long currentSkillXp = client.getSkillExperience(skill);
 			sessionCarryBySkill.put(skill, (long) XpBlocks.xpIntoBlock(
 				saved.getUncreditedXp(skill),
 				saved.getBaselineXp(skill),
 				currentSkillXp,
 				rule.getXpPerBlock()));
-			sessionSkillXpBySkill.put(skill, currentSkillXp);
 		}
 
 		sessionStartPacks = saved.getOpenedPacks();
@@ -136,8 +137,16 @@ public class CreditsTracker
 		long credits = 0L;
 		for (Skill skill : Skill.values())
 		{
+			if (!saved.hasBaselineXp(skill))
+			{
+				continue;
+			}
+
+			long currentSkillXp = client.getSkillExperience(skill);
+			credits += LevelUpCredits.between(saved.getBaselineXp(skill), currentSkillXp);
+
 			CreditRule rule = CreditRule.forSkill(skill);
-			if (!rule.earnsCredits() || !saved.hasBaselineXp(skill))
+			if (!rule.earnsCredits())
 			{
 				continue;
 			}
@@ -145,7 +154,7 @@ public class CreditsTracker
 			credits += (long) rule.getCreditsPerBlock() * XpBlocks.blocksCompleted(
 				saved.getUncreditedXp(skill),
 				saved.getBaselineXp(skill),
-				client.getSkillExperience(skill),
+				currentSkillXp,
 				rule.getXpPerBlock());
 		}
 
@@ -158,12 +167,19 @@ public class CreditsTracker
 		for (Map.Entry<Skill, Long> entry : sessionSkillXpBySkill.entrySet())
 		{
 			Skill skill = entry.getKey();
+			long currentSkillXp = client.getSkillExperience(skill);
+			credits += LevelUpCredits.between(entry.getValue(), currentSkillXp);
+
 			CreditRule rule = CreditRule.forSkill(skill);
+			if (!rule.earnsCredits())
+			{
+				continue;
+			}
 
 			credits += (long) rule.getCreditsPerBlock() * XpBlocks.blocksCompleted(
 				sessionCarryBySkill.get(skill),
 				entry.getValue(),
-				client.getSkillExperience(skill),
+				currentSkillXp,
 				rule.getXpPerBlock());
 		}
 

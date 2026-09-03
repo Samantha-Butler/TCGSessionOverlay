@@ -44,6 +44,33 @@ public class LevelUpCreditsTest
 	}
 
 	@Test
+	public void awardsNothingWhenNoLevelWasGained()
+	{
+		assertEquals(0L, LevelUpCredits.between(101510L, 101510L));
+		assertEquals(0L, LevelUpCredits.between(101510L, 105590L));
+	}
+
+	@Test
+	public void awardsTheReachedLevelOnASingleLevelUp()
+	{
+		assertEquals(2152L, LevelUpCredits.between(105590L, 112070L));
+	}
+
+	@Test
+	public void sumsEveryLevelCrossedInOneJump()
+	{
+		long expected = LevelUpCredits.forLevel(2) + LevelUpCredits.forLevel(3) + LevelUpCredits.forLevel(4);
+
+		assertEquals(expected, LevelUpCredits.between(0L, 300L));
+	}
+
+	@Test
+	public void awardsNothingWhenXpGoesBackwards()
+	{
+		assertEquals(0L, LevelUpCredits.between(112070L, 105590L));
+	}
+
+	@Test
 	public void increasesWithEveryLevel()
 	{
 		for (int level = 3; level < 99; level++)
