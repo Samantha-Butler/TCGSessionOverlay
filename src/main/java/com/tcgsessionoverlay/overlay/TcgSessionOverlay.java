@@ -9,6 +9,8 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
 import javax.inject.Inject;
 import net.runelite.api.Skill;
 import net.runelite.client.ui.overlay.OverlayPanel;
@@ -52,19 +54,76 @@ public class TcgSessionOverlay extends OverlayPanel
 		fontMetrics = graphics.getFontMetrics();
 		requiredContentWidth = 0;
 
-		panelComponent.getChildren().add(TitleComponent.builder()
-			.text("TCG Session")
-			.color(SECTION_COLOR)
-			.build());
+		if (config.compactMode())
+		{
+			renderCompact();
+		}
+		else
+		{
+			panelComponent.getChildren().add(TitleComponent.builder()
+				.text("TCG Session")
+				.color(SECTION_COLOR)
+				.build());
 
-		renderCredits();
-		renderRates();
-		renderXpCountdown();
+			renderCredits();
+			renderRates();
+			renderXpCountdown();
+		}
 
 		panelComponent.setPreferredSize(new Dimension(panelWidth(), 0));
 		setPreferredColor(config.backgroundColor());
 
 		return super.render(graphics);
+	}
+
+	private void renderCompact()
+	{
+		List<String> segments = new ArrayList<>();
+
+		if (config.showCredits() && creditsTracker.hasState())
+		{
+			segments.add(format(creditsTracker.getCredits()) + "cr");
+			segments.add("+" + format(creditsTracker.getSessionCreditsEarned()));
+		}
+
+		String xpSegment = compactXpSegment();
+		if (xpSegment != null)
+		{
+			segments.add(xpSegment);
+		}
+
+		if (config.showRates())
+		{
+			long creditsPerHour = ratesTracker.getCreditsPerHour();
+			segments.add((creditsPerHour >= 0 ? format(creditsPerHour) : "-") + "cr/hr");
+		}
+
+		if (segments.isEmpty())
+		{
+			addWaiting("Waiting for TCG data");
+			return;
+		}
+
+		String line = String.join("  ", segments);
+		widen(line, "");
+		panelComponent.getChildren().add(LineComponent.builder()
+			.left(line)
+			.build());
+	}
+
+	private String compactXpSegment()
+	{
+		if (xpCountdownTracker.getTrackedSkill() == null)
+		{
+			return null;
+		}
+
+		if (!xpCountdownTracker.isTrackedSkillEarningCredits())
+		{
+			return "Lvl " + format(xpCountdownTracker.getNextLevelCredits());
+		}
+
+		return "XP " + xpCountdownTracker.getXpInCurrentBlock() + "/" + xpCountdownTracker.getBlockSize();
 	}
 
 	private void renderCredits()
