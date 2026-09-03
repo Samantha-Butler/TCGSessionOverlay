@@ -59,6 +59,11 @@ public class SessionClock
 		return gap > 0 && gap <= IDLE_THRESHOLD.toNanos() ? gap : 0L;
 	}
 
+	public boolean isIdle()
+	{
+		return hasRecordedGain && System.nanoTime() - lastGainAtNanos > IDLE_THRESHOLD.toNanos();
+	}
+
 	public Duration getActiveTime()
 	{
 		return Duration.ofNanos(activeNanos);

@@ -3,6 +3,7 @@ package com.tcgsessionoverlay.overlay;
 import com.tcgsessionoverlay.TcgSessionOverlayConfig;
 import com.tcgsessionoverlay.session.CreditsTracker;
 import com.tcgsessionoverlay.session.RatesTracker;
+import com.tcgsessionoverlay.session.SessionClock;
 import com.tcgsessionoverlay.session.XpCountdownTracker;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -26,6 +27,7 @@ public class TcgSessionOverlay extends OverlayPanel
 	private final TcgSessionOverlayConfig config;
 	private final CreditsTracker creditsTracker;
 	private final RatesTracker ratesTracker;
+	private final SessionClock sessionClock;
 	private final XpCountdownTracker xpCountdownTracker;
 
 	private FontMetrics fontMetrics;
@@ -36,11 +38,13 @@ public class TcgSessionOverlay extends OverlayPanel
 		TcgSessionOverlayConfig config,
 		CreditsTracker creditsTracker,
 		RatesTracker ratesTracker,
+		SessionClock sessionClock,
 		XpCountdownTracker xpCountdownTracker)
 	{
 		this.config = config;
 		this.creditsTracker = creditsTracker;
 		this.ratesTracker = ratesTracker;
+		this.sessionClock = sessionClock;
 		this.xpCountdownTracker = xpCountdownTracker;
 		setPosition(OverlayPosition.TOP_LEFT);
 		panelComponent.setGap(new Point(0, 4));
@@ -49,6 +53,11 @@ public class TcgSessionOverlay extends OverlayPanel
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
+		if (config.hideWhenIdle() && sessionClock.isIdle())
+		{
+			return null;
+		}
+
 		fontMetrics = graphics.getFontMetrics();
 		requiredContentWidth = 0;
 
@@ -82,10 +91,13 @@ public class TcgSessionOverlay extends OverlayPanel
 			return;
 		}
 
+		long sessionCredits = creditsTracker.getSessionCreditsEarned();
+		long packsAffordable = creditsTracker.getPacksAffordable();
+
 		addLine("Balance", format(creditsTracker.getCredits()));
-		addLine("This session", "+" + format(creditsTracker.getSessionCreditsEarned()));
+		addLine("This session", "+" + format(sessionCredits), highlightWhen(sessionCredits > 0));
 		addLine("Lifetime", format(creditsTracker.getLifetimeCredits()));
-		addLine("Ready to buy", format(creditsTracker.getPacksAffordable()));
+		addLine("Ready to buy", format(packsAffordable), highlightWhen(packsAffordable > 0));
 		addLine("Next pack", format(creditsTracker.getCreditsTowardNextPack())
 			+ " / " + format(creditsTracker.getPackCost()));
 	}
@@ -174,12 +186,23 @@ public class TcgSessionOverlay extends OverlayPanel
 			.build());
 	}
 
+	private Color highlightWhen(boolean condition)
+	{
+		return condition ? config.highlightColor() : Color.WHITE;
+	}
+
 	private void addLine(String label, String value)
+	{
+		addLine(label, value, Color.WHITE);
+	}
+
+	private void addLine(String label, String value, Color valueColor)
 	{
 		widen(label, value);
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left(label)
 			.right(value)
+			.rightColor(valueColor)
 			.build());
 	}
 
