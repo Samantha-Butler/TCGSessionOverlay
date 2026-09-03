@@ -44,8 +44,19 @@ public class TcgStateParserTest
 		TcgState state = TcgStateParser.parse(SAMPLE).orElseThrow(AssertionError::new);
 
 		assertEquals(2, state.getUniqueCardNames());
-		assertEquals(3, state.getOwnedCards().size());
-		assertEquals(1, state.getFoilCount());
+		assertEquals(2, state.getOwnedCards().size());
+	}
+
+	@Test
+	public void leavesBetaCardsOutOfTheCollection()
+	{
+		TcgState state = TcgStateParser.parse(SAMPLE).orElseThrow(AssertionError::new);
+
+		assertEquals(0, state.getFoilCount());
+		for (OwnedCard card : state.getOwnedCards())
+		{
+			assertFalse(card.getCardName(), card.isBeta());
+		}
 	}
 
 	@Test

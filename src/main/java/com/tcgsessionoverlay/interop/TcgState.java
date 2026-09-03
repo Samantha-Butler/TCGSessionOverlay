@@ -3,8 +3,10 @@ package com.tcgsessionoverlay.interop;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.Getter;
 import net.runelite.api.Skill;
 
@@ -28,8 +30,7 @@ public final class TcgState
 		long profileSavedAtUnix,
 		Map<Skill, Long> uncreditedXpBySkill,
 		Map<Skill, Long> baselineSkillXp,
-		List<OwnedCard> ownedCards,
-		int uniqueCardNames)
+		List<OwnedCard> ownedCards)
 	{
 		this.credits = credits;
 		this.openedPacks = openedPacks;
@@ -37,17 +38,27 @@ public final class TcgState
 		this.profileSavedAtUnix = profileSavedAtUnix;
 		this.uncreditedXpBySkill = copyOf(uncreditedXpBySkill);
 		this.baselineSkillXp = copyOf(baselineSkillXp);
-		this.ownedCards = Collections.unmodifiableList(new ArrayList<>(ownedCards));
-		this.uniqueCardNames = uniqueCardNames;
+		List<OwnedCard> collected = new ArrayList<>();
+		for (OwnedCard card : ownedCards)
+		{
+			if (!card.isBeta())
+			{
+				collected.add(card);
+			}
+		}
+		this.ownedCards = Collections.unmodifiableList(collected);
 
+		Set<String> names = new HashSet<>();
 		int foils = 0;
 		for (OwnedCard card : this.ownedCards)
 		{
+			names.add(card.getCardName());
 			if (card.isFoil())
 			{
 				foils++;
 			}
 		}
+		this.uniqueCardNames = names.size();
 		this.foilCount = foils;
 	}
 

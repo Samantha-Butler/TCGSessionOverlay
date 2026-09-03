@@ -47,8 +47,7 @@ public final class TcgStateParser
 				readLong(root, "profileSavedAtUnix"),
 				parseSkillMap(root, "uncreditedXpBySkill"),
 				parseSkillMap(root, "skillXp"),
-				ownedCards,
-				countCardEntries(root)));
+				ownedCards));
 		}
 		catch (Exception e)
 		{
@@ -127,12 +126,6 @@ public final class TcgStateParser
 		}
 
 		return bySkill;
-	}
-
-	private static int countCardEntries(JsonObject root)
-	{
-		JsonArray entries = readArray(root, "cardEntries");
-		return entries == null ? 0 : entries.size();
 	}
 
 	private static JsonArray readArray(JsonObject object, String key)
