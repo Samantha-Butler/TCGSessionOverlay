@@ -27,6 +27,7 @@ public class CreditsTracker
 	private long sessionStartPacks;
 	private boolean hasState;
 	private long credits;
+	private long lifetimeCredits;
 	private long sessionCreditsEarned;
 	private long openedPacks;
 
@@ -70,7 +71,9 @@ public class CreditsTracker
 
 		TcgState saved = state.get();
 		hasState = true;
-		credits = saved.getCredits() + creditsSinceSave(saved);
+		long earnedSinceSave = creditsSinceSave(saved);
+		credits = saved.getCredits() + earnedSinceSave;
+		lifetimeCredits = saved.getTotalCreditsGained() + earnedSinceSave;
 		openedPacks = saved.getOpenedPacks();
 		sessionCreditsEarned = sessionStarted ? creditsSinceSessionStart() : 0L;
 	}
@@ -79,6 +82,7 @@ public class CreditsTracker
 	{
 		hasState = false;
 		credits = 0L;
+		lifetimeCredits = 0L;
 		openedPacks = 0L;
 		sessionCreditsEarned = 0L;
 	}
@@ -120,6 +124,11 @@ public class CreditsTracker
 	public long getCredits()
 	{
 		return credits;
+	}
+
+	public long getLifetimeCredits()
+	{
+		return lifetimeCredits;
 	}
 
 	public long getSessionCreditsEarned()

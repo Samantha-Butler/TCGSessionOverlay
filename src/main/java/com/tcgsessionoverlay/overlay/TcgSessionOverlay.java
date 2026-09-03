@@ -78,6 +78,7 @@ public class TcgSessionOverlay extends OverlayPanel
 
 		addLine("Balance", QuantityFormatter.formatNumber(creditsTracker.getCredits()));
 		addLine("This session", "+" + QuantityFormatter.formatNumber(creditsTracker.getSessionCreditsEarned()));
+		addLine("Lifetime", QuantityFormatter.formatNumber(creditsTracker.getLifetimeCredits()));
 		addLine("Ready to buy", QuantityFormatter.formatNumber(creditsTracker.getPacksAffordable()));
 		addLine("Next pack", QuantityFormatter.formatNumber(creditsTracker.getCreditsTowardNextPack())
 			+ " / " + QuantityFormatter.formatNumber(creditsTracker.getPackCost()));
