@@ -57,6 +57,10 @@ public class XpCountdownTracker
 	@Subscribe
 	public void onRuneScapeProfileChanged(RuneScapeProfileChanged event)
 	{
+		lastKnownXp.clear();
+		recentActionXp.clear();
+		trackedSkill = null;
+		trackedSkillLastGainAtNanos = 0;
 		anchoredSaveTime = 0;
 		loadState();
 	}
