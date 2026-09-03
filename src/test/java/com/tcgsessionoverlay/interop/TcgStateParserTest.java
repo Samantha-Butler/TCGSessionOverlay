@@ -28,47 +28,19 @@ public class TcgStateParserTest
 		+ "}";
 
 	@Test
+	public void ignoresCollectionFieldsItDoesNotUse()
+	{
+		assertTrue(TcgStateParser.parse(SAMPLE).isPresent());
+	}
+
+	@Test
 	public void parsesEconomyFields()
 	{
 		TcgState state = TcgStateParser.parse(SAMPLE).orElseThrow(AssertionError::new);
 
 		assertEquals(4640L, state.getCredits());
-		assertEquals(94L, state.getOpenedPacks());
 		assertEquals(196040L, state.getTotalCreditsGained());
 		assertEquals(1788382179L, state.getProfileSavedAtUnix());
-	}
-
-	@Test
-	public void parsesCardsAndFlattensVariants()
-	{
-		TcgState state = TcgStateParser.parse(SAMPLE).orElseThrow(AssertionError::new);
-
-		assertEquals(2, state.getUniqueCardNames());
-		assertEquals(2, state.getOwnedCards().size());
-	}
-
-	@Test
-	public void leavesBetaCardsOutOfTheCollection()
-	{
-		TcgState state = TcgStateParser.parse(SAMPLE).orElseThrow(AssertionError::new);
-
-		assertEquals(0, state.getFoilCount());
-		for (OwnedCard card : state.getOwnedCards())
-		{
-			assertFalse(card.getCardName(), card.isBeta());
-		}
-	}
-
-	@Test
-	public void treatsAbsentFoilAndBetaAsFalse()
-	{
-		TcgState state = TcgStateParser.parse(SAMPLE).orElseThrow(AssertionError::new);
-
-		OwnedCard plainCard = state.getOwnedCards().get(0);
-		assertEquals("Bronze bolts", plainCard.getCardName());
-		assertEquals(1788264647888L, plainCard.getPulledAt());
-		assertFalse(plainCard.isFoil());
-		assertFalse(plainCard.isBeta());
 	}
 
 	@Test
@@ -108,7 +80,7 @@ public class TcgStateParserTest
 
 		assertTrue(parsed.isPresent());
 		assertEquals(10L, parsed.get().getCredits());
-		assertEquals(0L, parsed.get().getOpenedPacks());
-		assertTrue(parsed.get().getOwnedCards().isEmpty());
+		assertEquals(0L, parsed.get().getTotalCreditsGained());
+		assertEquals(0L, parsed.get().getUncreditedXp(Skill.FISHING));
 	}
 }

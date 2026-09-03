@@ -24,12 +24,10 @@ public class CreditsTracker
 	private final Map<Skill, Long> sessionSkillXpBySkill = new EnumMap<>(Skill.class);
 
 	private boolean sessionStarted;
-	private long sessionStartPacks;
 	private boolean hasState;
 	private long credits;
 	private long lifetimeCredits;
 	private long sessionCreditsEarned;
-	private long openedPacks;
 
 	@Inject
 	public CreditsTracker(Client client, TcgSessionOverlayConfig config, TcgStateReader tcgStateReader)
@@ -43,7 +41,6 @@ public class CreditsTracker
 	public void onRuneScapeProfileChanged(RuneScapeProfileChanged event)
 	{
 		sessionStarted = false;
-		sessionStartPacks = 0;
 		sessionCarryBySkill.clear();
 		sessionSkillXpBySkill.clear();
 		clearTotals();
@@ -74,7 +71,6 @@ public class CreditsTracker
 		long earnedSinceSave = creditsSinceSave(saved);
 		credits = saved.getCredits() + earnedSinceSave;
 		lifetimeCredits = saved.getTotalCreditsGained() + earnedSinceSave;
-		openedPacks = saved.getOpenedPacks();
 		sessionCreditsEarned = sessionStarted ? creditsSinceSessionStart() : 0L;
 	}
 
@@ -83,7 +79,6 @@ public class CreditsTracker
 		hasState = false;
 		credits = 0L;
 		lifetimeCredits = 0L;
-		openedPacks = 0L;
 		sessionCreditsEarned = 0L;
 	}
 
@@ -112,7 +107,6 @@ public class CreditsTracker
 				rule.getXpPerBlock()));
 		}
 
-		sessionStartPacks = saved.getOpenedPacks();
 		sessionStarted = true;
 	}
 
@@ -134,16 +128,6 @@ public class CreditsTracker
 	public long getSessionCreditsEarned()
 	{
 		return sessionCreditsEarned;
-	}
-
-	public long getOpenedPacks()
-	{
-		return openedPacks;
-	}
-
-	public long getSessionPacksOpened()
-	{
-		return sessionStarted ? getOpenedPacks() - sessionStartPacks : 0L;
 	}
 
 	public int getPackCost()
