@@ -2,6 +2,7 @@ package com.tcgsessionoverlay.overlay;
 
 import com.tcgsessionoverlay.TcgSessionOverlayConfig;
 import com.tcgsessionoverlay.session.CreditsTracker;
+import com.tcgsessionoverlay.session.RatesTracker;
 import com.tcgsessionoverlay.session.XpBlocks;
 import com.tcgsessionoverlay.session.XpCountdownTracker;
 import java.awt.Color;
@@ -24,16 +25,19 @@ public class TcgSessionOverlay extends OverlayPanel
 
 	private final TcgSessionOverlayConfig config;
 	private final CreditsTracker creditsTracker;
+	private final RatesTracker ratesTracker;
 	private final XpCountdownTracker xpCountdownTracker;
 
 	@Inject
 	private TcgSessionOverlay(
 		TcgSessionOverlayConfig config,
 		CreditsTracker creditsTracker,
+		RatesTracker ratesTracker,
 		XpCountdownTracker xpCountdownTracker)
 	{
 		this.config = config;
 		this.creditsTracker = creditsTracker;
+		this.ratesTracker = ratesTracker;
 		this.xpCountdownTracker = xpCountdownTracker;
 		setPosition(OverlayPosition.TOP_LEFT);
 		panelComponent.setGap(new Point(0, 4));
@@ -49,6 +53,7 @@ public class TcgSessionOverlay extends OverlayPanel
 			.build());
 
 		renderCredits();
+		renderRates();
 		renderXpCountdown();
 
 		return super.render(graphics);
@@ -77,6 +82,21 @@ public class TcgSessionOverlay extends OverlayPanel
 		addLine("Ready to buy", QuantityFormatter.formatNumber(creditsTracker.getPacksAffordable()));
 		addLine("Next pack", QuantityFormatter.formatNumber(creditsTracker.getCreditsTowardNextPack())
 			+ " / " + QuantityFormatter.formatNumber(creditsTracker.getPackCost()));
+	}
+
+	private void renderRates()
+	{
+		if (!config.showRates())
+		{
+			return;
+		}
+
+		addSection("Rates");
+
+		long creditsPerHour = ratesTracker.getCreditsPerHour();
+		addLine("Credits / hr", creditsPerHour >= 0
+			? QuantityFormatter.formatNumber(creditsPerHour)
+			: "-");
 	}
 
 	private void renderXpCountdown()

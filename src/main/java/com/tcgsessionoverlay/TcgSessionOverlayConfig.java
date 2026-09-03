@@ -19,12 +19,23 @@ public interface TcgSessionOverlayConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "showRates",
+		name = "Show rates",
+		description = "Show credits earned per hour. Time spent with no XP for over five minutes is not counted.",
+		position = 2
+	)
+	default boolean showRates()
+	{
+		return true;
+	}
+
 	@Range(min = 1, max = 100000)
 	@ConfigItem(
 		keyName = "packCost",
 		name = "Pack cost",
 		description = "Credits per pack, taken from the Shop tab of the OSRS TCG panel. Press Enter or use the arrows to apply a typed value.",
-		position = 2
+		position = 3
 	)
 	default int packCost()
 	{

@@ -4,6 +4,7 @@ import com.google.inject.Provides;
 import com.tcgsessionoverlay.interop.TcgStateReader;
 import com.tcgsessionoverlay.overlay.TcgSessionOverlay;
 import com.tcgsessionoverlay.session.CreditsTracker;
+import com.tcgsessionoverlay.session.SessionClock;
 import com.tcgsessionoverlay.session.XpCountdownTracker;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,9 @@ public class TcgSessionOverlayPlugin extends Plugin
 	@Inject
 	private CreditsTracker creditsTracker;
 
+	@Inject
+	private SessionClock sessionClock;
+
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -51,6 +55,7 @@ public class TcgSessionOverlayPlugin extends Plugin
 		eventBus.register(xpCountdownTracker);
 		eventBus.register(tcgStateReader);
 		eventBus.register(creditsTracker);
+		eventBus.register(sessionClock);
 		log.debug("TCG Session Overlay started");
 	}
 
@@ -61,6 +66,7 @@ public class TcgSessionOverlayPlugin extends Plugin
 		eventBus.unregister(xpCountdownTracker);
 		eventBus.unregister(tcgStateReader);
 		eventBus.unregister(creditsTracker);
+		eventBus.unregister(sessionClock);
 		log.debug("TCG Session Overlay stopped");
 	}
 
