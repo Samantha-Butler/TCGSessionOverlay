@@ -4,6 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import com.tcgsessionoverlay.interop.TcgState;
 import com.tcgsessionoverlay.interop.TcgStateReader;
 import java.lang.reflect.Type;
+import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +28,7 @@ import net.runelite.client.events.RuneScapeProfileChanged;
 public class XpCountdownTracker
 {
 	private static final int SAMPLE_WINDOW = 10;
+	private static final Duration PREFERRED_SKILL_WINDOW = Duration.ofMinutes(5);
 	private static final String CONFIG_GROUP = "tcgsessionoverlay";
 	private static final String XP_IN_BLOCK_KEY = "xpInBlockBySkill";
 	private static final Type XP_IN_BLOCK_TYPE = new TypeToken<Map<Skill, Integer>>()
@@ -41,6 +43,7 @@ public class XpCountdownTracker
 	private final Deque<Integer> recentActionXp = new ArrayDeque<>();
 
 	private Skill trackedSkill;
+	private long trackedSkillLastGainAtNanos;
 	private long anchoredSaveTime;
 
 	@Inject
@@ -136,17 +139,7 @@ public class XpCountdownTracker
 			return;
 		}
 
-		if (skill != trackedSkill)
-		{
-			trackedSkill = skill;
-			recentActionXp.clear();
-		}
-
-		recentActionXp.addLast(gained);
-		if (recentActionXp.size() > SAMPLE_WINDOW)
-		{
-			recentActionXp.removeFirst();
-		}
+		trackDisplayedSkill(skill, gained, System.nanoTime());
 
 		CreditRule rule = CreditRule.forSkill(skill);
 		if (!rule.earnsCredits())
@@ -157,6 +150,52 @@ public class XpCountdownTracker
 		int updatedBlockXp = (xpInBlockBySkill.getOrDefault(skill, 0) + gained) % rule.getXpPerBlock();
 		xpInBlockBySkill.put(skill, updatedBlockXp);
 		saveState();
+	}
+
+	void trackDisplayedSkill(Skill skill, int gained, long nowNanos)
+	{
+		if (!shouldDisplay(skill, nowNanos))
+		{
+			return;
+		}
+
+		if (skill != trackedSkill)
+		{
+			trackedSkill = skill;
+			recentActionXp.clear();
+		}
+
+		trackedSkillLastGainAtNanos = nowNanos;
+		recentActionXp.addLast(gained);
+		if (recentActionXp.size() > SAMPLE_WINDOW)
+		{
+			recentActionXp.removeFirst();
+		}
+	}
+
+	private boolean shouldDisplay(Skill skill, long nowNanos)
+	{
+		if (trackedSkill == null || skill == trackedSkill)
+		{
+			return true;
+		}
+
+		if (displayPriority(skill) >= displayPriority(trackedSkill))
+		{
+			return true;
+		}
+
+		return nowNanos - trackedSkillLastGainAtNanos > PREFERRED_SKILL_WINDOW.toNanos();
+	}
+
+	static int displayPriority(Skill skill)
+	{
+		if (CreditRule.forSkill(skill).earnsCredits())
+		{
+			return 2;
+		}
+
+		return skill == Skill.HITPOINTS ? 0 : 1;
 	}
 
 	public int getXpInCurrentBlock()
