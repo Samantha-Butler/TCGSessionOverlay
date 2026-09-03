@@ -6,26 +6,30 @@ import com.tcgsessionoverlay.session.RatesTracker;
 import com.tcgsessionoverlay.session.XpCountdownTracker;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import javax.inject.Inject;
 import net.runelite.api.Skill;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
+import net.runelite.client.ui.overlay.components.ComponentConstants;
 import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.ProgressBarComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
-import net.runelite.client.util.QuantityFormatter;
 
 public class TcgSessionOverlay extends OverlayPanel
 {
 	private static final Color SECTION_COLOR = Color.ORANGE;
-	private static final int PANEL_WIDTH = 160;
+	private static final int MINIMUM_PANEL_WIDTH = 160;
 
 	private final TcgSessionOverlayConfig config;
 	private final CreditsTracker creditsTracker;
 	private final RatesTracker ratesTracker;
 	private final XpCountdownTracker xpCountdownTracker;
+
+	private FontMetrics fontMetrics;
+	private int requiredContentWidth;
 
 	@Inject
 	private TcgSessionOverlay(
@@ -40,12 +44,14 @@ public class TcgSessionOverlay extends OverlayPanel
 		this.xpCountdownTracker = xpCountdownTracker;
 		setPosition(OverlayPosition.TOP_LEFT);
 		panelComponent.setGap(new Point(0, 4));
-		panelComponent.setPreferredSize(new Dimension(PANEL_WIDTH, 0));
 	}
 
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
+		fontMetrics = graphics.getFontMetrics();
+		requiredContentWidth = 0;
+
 		panelComponent.getChildren().add(TitleComponent.builder()
 			.text("TCG Session")
 			.color(SECTION_COLOR)
@@ -54,6 +60,9 @@ public class TcgSessionOverlay extends OverlayPanel
 		renderCredits();
 		renderRates();
 		renderXpCountdown();
+
+		panelComponent.setPreferredSize(new Dimension(panelWidth(), 0));
+		setPreferredColor(config.backgroundColor());
 
 		return super.render(graphics);
 	}
@@ -69,19 +78,16 @@ public class TcgSessionOverlay extends OverlayPanel
 
 		if (!creditsTracker.hasState())
 		{
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("Waiting for TCG data")
-				.leftColor(Color.LIGHT_GRAY)
-				.build());
+			addWaiting("Waiting for TCG data");
 			return;
 		}
 
-		addLine("Balance", QuantityFormatter.formatNumber(creditsTracker.getCredits()));
-		addLine("This session", "+" + QuantityFormatter.formatNumber(creditsTracker.getSessionCreditsEarned()));
-		addLine("Lifetime", QuantityFormatter.formatNumber(creditsTracker.getLifetimeCredits()));
-		addLine("Ready to buy", QuantityFormatter.formatNumber(creditsTracker.getPacksAffordable()));
-		addLine("Next pack", QuantityFormatter.formatNumber(creditsTracker.getCreditsTowardNextPack())
-			+ " / " + QuantityFormatter.formatNumber(creditsTracker.getPackCost()));
+		addLine("Balance", format(creditsTracker.getCredits()));
+		addLine("This session", "+" + format(creditsTracker.getSessionCreditsEarned()));
+		addLine("Lifetime", format(creditsTracker.getLifetimeCredits()));
+		addLine("Ready to buy", format(creditsTracker.getPacksAffordable()));
+		addLine("Next pack", format(creditsTracker.getCreditsTowardNextPack())
+			+ " / " + format(creditsTracker.getPackCost()));
 	}
 
 	private void renderRates()
@@ -94,9 +100,7 @@ public class TcgSessionOverlay extends OverlayPanel
 		addSection("Rates");
 
 		long creditsPerHour = ratesTracker.getCreditsPerHour();
-		addLine("Credits / hr", creditsPerHour >= 0
-			? QuantityFormatter.formatNumber(creditsPerHour)
-			: "-");
+		addLine("Credits / hr", creditsPerHour >= 0 ? format(creditsPerHour) : "-");
 	}
 
 	private void renderXpCountdown()
@@ -106,20 +110,15 @@ public class TcgSessionOverlay extends OverlayPanel
 		Skill trackedSkill = xpCountdownTracker.getTrackedSkill();
 		if (trackedSkill == null)
 		{
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("Waiting for XP")
-				.leftColor(Color.LIGHT_GRAY)
-				.build());
+			addWaiting("Waiting for XP");
 			return;
 		}
 
-		panelComponent.getChildren().add(LineComponent.builder()
-			.left(trackedSkill.getName())
-			.build());
+		addSkillName(trackedSkill.getName());
 
 		if (!xpCountdownTracker.isTrackedSkillEarningCredits())
 		{
-			addLine("Level up credits", QuantityFormatter.formatNumber(xpCountdownTracker.getNextLevelCredits()));
+			addLine("Level up credits", format(xpCountdownTracker.getNextLevelCredits()));
 			return;
 		}
 
@@ -139,8 +138,31 @@ public class TcgSessionOverlay extends OverlayPanel
 		}
 	}
 
+	private void addWaiting(String message)
+	{
+		widen(message, "");
+		panelComponent.getChildren().add(LineComponent.builder()
+			.left(message)
+			.leftColor(Color.LIGHT_GRAY)
+			.build());
+	}
+
+	private void addSkillName(String name)
+	{
+		widen(name, "");
+		panelComponent.getChildren().add(LineComponent.builder()
+			.left(name)
+			.build());
+	}
+
+	private int panelWidth()
+	{
+		return Math.max(MINIMUM_PANEL_WIDTH, requiredContentWidth + 2 * ComponentConstants.STANDARD_BORDER);
+	}
+
 	private void addSection(String name)
 	{
+		widen(name, "");
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left(name)
 			.leftColor(SECTION_COLOR)
@@ -149,9 +171,21 @@ public class TcgSessionOverlay extends OverlayPanel
 
 	private void addLine(String label, String value)
 	{
+		widen(label, value);
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left(label)
 			.right(value)
 			.build());
+	}
+
+	private void widen(String left, String right)
+	{
+		requiredContentWidth = Math.max(requiredContentWidth,
+			fontMetrics.stringWidth(left) + fontMetrics.stringWidth(right));
+	}
+
+	private String format(long value)
+	{
+		return config.numberStyle().format(value);
 	}
 }

@@ -1,13 +1,25 @@
 package com.tcgsessionoverlay;
 
+import com.tcgsessionoverlay.overlay.NumberStyle;
+import java.awt.Color;
+import net.runelite.client.config.Alpha;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.ConfigSection;
 import net.runelite.client.config.Range;
+import net.runelite.client.ui.overlay.components.ComponentConstants;
 
 @ConfigGroup("tcgsessionoverlay")
 public interface TcgSessionOverlayConfig extends Config
 {
+	@ConfigSection(
+		name = "Appearance",
+		description = "How the overlay looks.",
+		position = 80
+	)
+	String appearanceSection = "appearance";
+
 	@ConfigItem(
 		keyName = "showCredits",
 		name = "Show credits",
@@ -40,5 +52,30 @@ public interface TcgSessionOverlayConfig extends Config
 	default int packCost()
 	{
 		return 2500;
+	}
+
+	@Alpha
+	@ConfigItem(
+		keyName = "backgroundColor",
+		name = "Background",
+		description = "Overlay background colour. Drag the alpha slider left to make the panel more transparent.",
+		position = 81,
+		section = appearanceSection
+	)
+	default Color backgroundColor()
+	{
+		return ComponentConstants.STANDARD_BACKGROUND_COLOR;
+	}
+
+	@ConfigItem(
+		keyName = "numberStyle",
+		name = "Number format",
+		description = "Full shows 199,982. Short shows 199.9K.",
+		position = 82,
+		section = appearanceSection
+	)
+	default NumberStyle numberStyle()
+	{
+		return NumberStyle.FULL;
 	}
 }
