@@ -113,7 +113,7 @@ public class TcgSessionOverlay extends OverlayPanel
 
 	private String compactXpSegment()
 	{
-		if (xpCountdownTracker.getTrackedSkill() == null)
+		if (!config.showXpCountdown() || xpCountdownTracker.getTrackedSkill() == null)
 		{
 			return null;
 		}
@@ -164,6 +164,11 @@ public class TcgSessionOverlay extends OverlayPanel
 
 	private void renderXpCountdown()
 	{
+		if (!config.showXpCountdown())
+		{
+			return;
+		}
+
 		addSection("XP Countdown");
 
 		Skill trackedSkill = xpCountdownTracker.getTrackedSkill();

@@ -42,12 +42,23 @@ public interface TcgSessionOverlayConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "showXpCountdown",
+		name = "Show XP countdown",
+		description = "Show progress to the next credit award for the skill you are training.",
+		position = 3
+	)
+	default boolean showXpCountdown()
+	{
+		return true;
+	}
+
 	@Range(min = 1, max = 100000)
 	@ConfigItem(
 		keyName = "packCost",
 		name = "Pack cost",
 		description = "Credits per pack, taken from the Shop tab of the OSRS TCG panel. Press Enter or use the arrows to apply a typed value.",
-		position = 3
+		position = 4
 	)
 	default int packCost()
 	{
