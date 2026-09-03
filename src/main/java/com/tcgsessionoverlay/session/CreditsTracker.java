@@ -25,6 +25,10 @@ public class CreditsTracker
 
 	private boolean sessionStarted;
 	private long sessionStartPacks;
+	private boolean hasState;
+	private long credits;
+	private long sessionCreditsEarned;
+	private long openedPacks;
 
 	@Inject
 	public CreditsTracker(Client client, TcgSessionOverlayConfig config, TcgStateReader tcgStateReader)
@@ -41,6 +45,7 @@ public class CreditsTracker
 		sessionStartPacks = 0;
 		sessionCarryBySkill.clear();
 		sessionSkillXpBySkill.clear();
+		clearTotals();
 	}
 
 	@Subscribe
@@ -50,6 +55,32 @@ public class CreditsTracker
 		{
 			tcgStateReader.getState().ifPresent(this::startSession);
 		}
+
+		refreshTotals();
+	}
+
+	private void refreshTotals()
+	{
+		Optional<TcgState> state = tcgStateReader.getState();
+		if (!state.isPresent())
+		{
+			clearTotals();
+			return;
+		}
+
+		TcgState saved = state.get();
+		hasState = true;
+		credits = saved.getCredits() + creditsSinceSave(saved);
+		openedPacks = saved.getOpenedPacks();
+		sessionCreditsEarned = sessionStarted ? creditsSinceSessionStart() : 0L;
+	}
+
+	private void clearTotals()
+	{
+		hasState = false;
+		credits = 0L;
+		openedPacks = 0L;
+		sessionCreditsEarned = 0L;
 	}
 
 	private void startSession(TcgState saved)
@@ -83,28 +114,22 @@ public class CreditsTracker
 
 	public boolean hasState()
 	{
-		return tcgStateReader.getState().isPresent();
+		return hasState;
 	}
 
 	public long getCredits()
 	{
-		Optional<TcgState> state = tcgStateReader.getState();
-		if (!state.isPresent())
-		{
-			return 0L;
-		}
-
-		return state.get().getCredits() + creditsSinceSave(state.get());
+		return credits;
 	}
 
 	public long getSessionCreditsEarned()
 	{
-		return creditsSinceSessionStart();
+		return sessionCreditsEarned;
 	}
 
 	public long getOpenedPacks()
 	{
-		return tcgStateReader.getState().map(TcgState::getOpenedPacks).orElse(0L);
+		return openedPacks;
 	}
 
 	public long getSessionPacksOpened()
@@ -119,12 +144,12 @@ public class CreditsTracker
 
 	public long getPacksAffordable()
 	{
-		return Math.max(0L, getCredits()) / getPackCost();
+		return Math.max(0L, credits) / getPackCost();
 	}
 
 	public long getCreditsTowardNextPack()
 	{
-		return Math.max(0L, getCredits()) % getPackCost();
+		return Math.max(0L, credits) % getPackCost();
 	}
 
 	public long getCreditsToNextPack()
