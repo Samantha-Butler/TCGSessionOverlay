@@ -5,7 +5,7 @@ next credits and the next pack without opening a panel.
 
 ![Status](https://img.shields.io/badge/status-in%20development-orange)
 
-<img src="docs/overlay.png" alt="The overlay in game, showing credits, rates and the XP countdown" width="247">
+<img src="docs/overlay.png" alt="The overlay in game, showing credits, rates and the XP countdown" width="249">
 
 ## What you need
 
