@@ -135,19 +135,9 @@ public class CreditsTracker
 		return Math.max(1, config.packCost());
 	}
 
-	public long getPacksAffordable()
-	{
-		return Math.max(0L, credits) / getPackCost();
-	}
-
 	public long getCreditsTowardNextPack()
 	{
 		return Math.max(0L, credits) % getPackCost();
-	}
-
-	public long getCreditsToNextPack()
-	{
-		return getPackCost() - getCreditsTowardNextPack();
 	}
 
 	private long creditsSinceSave(TcgState saved)

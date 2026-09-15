@@ -92,12 +92,10 @@ public class TcgSessionOverlay extends OverlayPanel
 		}
 
 		long sessionCredits = creditsTracker.getSessionCreditsEarned();
-		long packsAffordable = creditsTracker.getPacksAffordable();
 
 		addLine("Balance", format(creditsTracker.getCredits()));
 		addLine("This session", "+" + format(sessionCredits), highlightWhen(sessionCredits > 0));
 		addLine("Lifetime", format(creditsTracker.getLifetimeCredits()));
-		addLine("Ready to buy", format(packsAffordable), highlightWhen(packsAffordable > 0));
 		addLine("Next pack", format(creditsTracker.getCreditsTowardNextPack())
 			+ " / " + format(creditsTracker.getPackCost()));
 	}

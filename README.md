@@ -19,7 +19,6 @@ computer and never writes to it, so nothing you do here can affect your collecti
 - **Balance** is your current credits.
 - **This session** is what you have earned since you logged in. It turns green once you earn anything.
 - **Lifetime** is every credit you have ever earned.
-- **Ready to buy** is how many packs you could buy right now. It turns green at 1.
 - **Next pack** is your progress towards affording another one.
 
 ### Rates
@@ -55,7 +54,7 @@ XP does not earn credits.
 | Show rates | Turn the Rates section on or off |
 | Show XP countdown | Turn the XP Countdown section on or off |
 | Pack cost | The price of the pack you buy, from the Shop tab of the OSRS TCG panel |
-| Highlight | The colour used for session earnings and when you can afford a pack |
+| Highlight | The colour used once you have earned credits this session |
 | Hide when idle | Hides the overlay after five minutes without XP, and brings it back on your next XP drop |
 | Background | Panel colour. Drag the alpha slider left to make it more see through |
 | Number format | `199,982` or `199.9K` |

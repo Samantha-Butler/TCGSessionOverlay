@@ -23,7 +23,7 @@ public interface TcgSessionOverlayConfig extends Config
 	@ConfigItem(
 		keyName = "showCredits",
 		name = "Show credits",
-		description = "Show the credit balance, session earnings, packs you can buy now and progress to the next pack.",
+		description = "Show the credit balance, session earnings, lifetime credits and progress to the next pack.",
 		position = 1
 	)
 	default boolean showCredits()
@@ -68,7 +68,7 @@ public interface TcgSessionOverlayConfig extends Config
 	@ConfigItem(
 		keyName = "highlightColor",
 		name = "Highlight",
-		description = "Colour used once you have earned credits this session, and once you can afford a pack.",
+		description = "Colour used once you have earned credits this session.",
 		position = 81,
 		section = appearanceSection
 	)
