@@ -1,9 +1,7 @@
 package com.tcgsessionoverlay.session;
 
-import com.google.gson.reflect.TypeToken;
 import com.tcgsessionoverlay.interop.TcgState;
 import com.tcgsessionoverlay.interop.TcgStateReader;
-import java.lang.reflect.Type;
 import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -20,7 +18,6 @@ import net.runelite.api.Experience;
 import net.runelite.api.Skill;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.StatChanged;
-import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.RuneScapeProfileChanged;
 
@@ -29,14 +26,8 @@ public class XpCountdownTracker
 {
 	private static final int SAMPLE_WINDOW = 10;
 	private static final Duration PREFERRED_SKILL_WINDOW = Duration.ofMinutes(5);
-	private static final String CONFIG_GROUP = "tcgsessionoverlay";
-	private static final String XP_IN_BLOCK_KEY = "xpInBlockBySkill";
-	private static final Type XP_IN_BLOCK_TYPE = new TypeToken<Map<Skill, Integer>>()
-	{
-	}.getType();
 
 	private final Client client;
-	private final ConfigManager configManager;
 	private final TcgStateReader tcgStateReader;
 	private final Map<Skill, Integer> lastKnownXp = new EnumMap<>(Skill.class);
 	private final Map<Skill, Integer> xpInBlockBySkill = new EnumMap<>(Skill.class);
@@ -47,10 +38,9 @@ public class XpCountdownTracker
 	private long anchoredSaveTime;
 
 	@Inject
-	public XpCountdownTracker(Client client, ConfigManager configManager, TcgStateReader tcgStateReader)
+	public XpCountdownTracker(Client client, TcgStateReader tcgStateReader)
 	{
 		this.client = client;
-		this.configManager = configManager;
 		this.tcgStateReader = tcgStateReader;
 	}
 
@@ -62,22 +52,7 @@ public class XpCountdownTracker
 		trackedSkill = null;
 		trackedSkillLastGainAtNanos = 0;
 		anchoredSaveTime = 0;
-		loadState();
-	}
-
-	private void loadState()
-	{
-		Map<Skill, Integer> saved = configManager.getRSProfileConfiguration(CONFIG_GROUP, XP_IN_BLOCK_KEY, XP_IN_BLOCK_TYPE);
 		xpInBlockBySkill.clear();
-		if (saved != null)
-		{
-			xpInBlockBySkill.putAll(saved);
-		}
-	}
-
-	private void saveState()
-	{
-		configManager.setRSProfileConfiguration(CONFIG_GROUP, XP_IN_BLOCK_KEY, xpInBlockBySkill);
 	}
 
 	@Subscribe
@@ -121,8 +96,6 @@ public class XpCountdownTracker
 				client.getSkillExperience(skill),
 				rule.getXpPerBlock()));
 		}
-
-		saveState();
 	}
 
 	@Subscribe
@@ -153,7 +126,6 @@ public class XpCountdownTracker
 
 		int updatedBlockXp = (xpInBlockBySkill.getOrDefault(skill, 0) + gained) % rule.getXpPerBlock();
 		xpInBlockBySkill.put(skill, updatedBlockXp);
-		saveState();
 	}
 
 	void trackDisplayedSkill(Skill skill, int gained, long nowNanos)
