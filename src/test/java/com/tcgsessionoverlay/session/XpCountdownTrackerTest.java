@@ -1,6 +1,7 @@
 package com.tcgsessionoverlay.session;
 
 import net.runelite.api.Skill;
+import net.runelite.api.events.GameTick;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -8,6 +9,21 @@ import static org.junit.Assert.assertTrue;
 
 public class XpCountdownTrackerTest
 {
+	@Test
+	public void anchorsBlockProgressToTheSaveOnceSkillXpArrives()
+	{
+		FakeClient game = new FakeClient();
+		XpCountdownTracker tracker = new XpCountdownTracker(game.client(), new SavedStateReader(game.client()));
+
+		tracker.onGameTick(new GameTick());
+		game.setXp(Skill.HITPOINTS, SavedStateReader.HITPOINTS_XP);
+		game.setXp(Skill.FIREMAKING, SavedStateReader.FIREMAKING_XP + 200);
+		tracker.onGameTick(new GameTick());
+		tracker.trackDisplayedSkill(Skill.FIREMAKING, 200, 0L);
+
+		assertEquals(SavedStateReader.FIREMAKING_CARRY + 200, tracker.getXpInCurrentBlock());
+	}
+
 	@Test
 	public void ranksCreditEarningSkillsHighest()
 	{

@@ -49,7 +49,7 @@ public class CreditsTracker
 	@Subscribe
 	public void onGameTick(GameTick event)
 	{
-		if (!sessionStarted)
+		if (!sessionStarted && SkillXp.isLoaded(client))
 		{
 			tcgStateReader.getState().ifPresent(this::startSession);
 		}

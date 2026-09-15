@@ -63,6 +63,11 @@ public class XpCountdownTracker
 
 	private void anchorToSavedState()
 	{
+		if (!SkillXp.isLoaded(client))
+		{
+			return;
+		}
+
 		Optional<TcgState> state = tcgStateReader.getState();
 		if (!state.isPresent())
 		{
