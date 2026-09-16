@@ -2,6 +2,7 @@ package com.tcgsessionoverlay.session;
 
 import com.tcgsessionoverlay.interop.TcgState;
 import com.tcgsessionoverlay.interop.TcgStateReader;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
@@ -17,10 +18,14 @@ final class SavedStateReader extends TcgStateReader
 
 	private final TcgState state;
 
-	SavedStateReader(Client client)
+	private SavedStateReader(Client client, TcgState state)
 	{
 		super(client, null);
+		this.state = state;
+	}
 
+	static SavedStateReader firemakingSave(Client client)
+	{
 		Map<Skill, Long> carry = new EnumMap<>(Skill.class);
 		carry.put(Skill.FIREMAKING, (long) FIREMAKING_CARRY);
 
@@ -28,7 +33,12 @@ final class SavedStateReader extends TcgStateReader
 		baseline.put(Skill.HITPOINTS, (long) HITPOINTS_XP);
 		baseline.put(Skill.FIREMAKING, (long) FIREMAKING_XP);
 
-		state = new TcgState(CREDITS, CREDITS, 1L, carry, baseline);
+		return new SavedStateReader(client, new TcgState(CREDITS, CREDITS, 1L, carry, baseline));
+	}
+
+	static SavedStateReader emptySave(Client client)
+	{
+		return new SavedStateReader(client, new TcgState(0L, 0L, 1L, Collections.emptyMap(), Collections.emptyMap()));
 	}
 
 	@Override

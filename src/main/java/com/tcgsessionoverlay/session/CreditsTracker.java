@@ -25,6 +25,7 @@ public class CreditsTracker
 
 	private boolean sessionStarted;
 	private boolean hasState;
+	private boolean hasBalance;
 	private long credits;
 	private long lifetimeCredits;
 	private long sessionCreditsEarned;
@@ -68,6 +69,7 @@ public class CreditsTracker
 
 		TcgState saved = state.get();
 		hasState = true;
+		hasBalance = saved.hasSkillXp();
 		long earnedSinceSave = creditsSinceSave(saved);
 		credits = saved.getCredits() + earnedSinceSave;
 		lifetimeCredits = saved.getTotalCreditsGained() + earnedSinceSave;
@@ -77,6 +79,7 @@ public class CreditsTracker
 	private void clearTotals()
 	{
 		hasState = false;
+		hasBalance = false;
 		credits = 0L;
 		lifetimeCredits = 0L;
 		sessionCreditsEarned = 0L;
@@ -86,11 +89,6 @@ public class CreditsTracker
 	{
 		for (Skill skill : Skill.values())
 		{
-			if (!saved.hasBaselineXp(skill))
-			{
-				continue;
-			}
-
 			long currentSkillXp = client.getSkillExperience(skill);
 			sessionSkillXpBySkill.put(skill, currentSkillXp);
 
@@ -100,19 +98,34 @@ public class CreditsTracker
 				continue;
 			}
 
-			sessionCarryBySkill.put(skill, (long) XpBlocks.xpIntoBlock(
-				saved.getUncreditedXp(skill),
-				saved.getBaselineXp(skill),
-				currentSkillXp,
-				rule.getXpPerBlock()));
+			sessionCarryBySkill.put(skill, sessionCarry(saved, skill, currentSkillXp, rule));
 		}
 
 		sessionStarted = true;
 	}
 
+	private static long sessionCarry(TcgState saved, Skill skill, long currentSkillXp, CreditRule rule)
+	{
+		if (!saved.hasBaselineXp(skill))
+		{
+			return 0L;
+		}
+
+		return XpBlocks.xpIntoBlock(
+			saved.getUncreditedXp(skill),
+			saved.getBaselineXp(skill),
+			currentSkillXp,
+			rule.getXpPerBlock());
+	}
+
 	public boolean hasState()
 	{
 		return hasState;
+	}
+
+	public boolean hasBalance()
+	{
+		return hasBalance;
 	}
 
 	public long getCredits()

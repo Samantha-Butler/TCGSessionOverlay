@@ -13,7 +13,7 @@ public class XpCountdownTrackerTest
 	public void anchorsBlockProgressToTheSaveOnceSkillXpArrives()
 	{
 		FakeClient game = new FakeClient();
-		XpCountdownTracker tracker = new XpCountdownTracker(game.client(), new SavedStateReader(game.client()));
+		XpCountdownTracker tracker = new XpCountdownTracker(game.client(), SavedStateReader.firemakingSave(game.client()));
 
 		tracker.onGameTick(new GameTick());
 		game.setXp(Skill.HITPOINTS, SavedStateReader.HITPOINTS_XP);

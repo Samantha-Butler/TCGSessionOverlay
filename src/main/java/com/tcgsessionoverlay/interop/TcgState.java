@@ -34,6 +34,11 @@ public final class TcgState
 		return uncreditedXpBySkill.getOrDefault(skill, 0L);
 	}
 
+	public boolean hasSkillXp()
+	{
+		return !baselineSkillXp.isEmpty();
+	}
+
 	public boolean hasBaselineXp(Skill skill)
 	{
 		return baselineSkillXp.containsKey(skill);

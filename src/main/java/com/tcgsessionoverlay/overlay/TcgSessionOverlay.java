@@ -91,13 +91,15 @@ public class TcgSessionOverlay extends OverlayPanel
 			return;
 		}
 
+		boolean hasBalance = creditsTracker.hasBalance();
 		long sessionCredits = creditsTracker.getSessionCreditsEarned();
 
-		addLine("Balance", format(creditsTracker.getCredits()));
+		addLine("Balance", hasBalance ? format(creditsTracker.getCredits()) : "-");
 		addLine("This session", "+" + format(sessionCredits), highlightWhen(sessionCredits > 0));
-		addLine("Lifetime", format(creditsTracker.getLifetimeCredits()));
-		addLine("Next pack", format(creditsTracker.getCreditsTowardNextPack())
-			+ " / " + format(creditsTracker.getPackCost()));
+		addLine("Lifetime", hasBalance ? format(creditsTracker.getLifetimeCredits()) : "-");
+		addLine("Next pack", hasBalance
+			? format(creditsTracker.getCreditsTowardNextPack()) + " / " + format(creditsTracker.getPackCost())
+			: "-");
 	}
 
 	private void renderRates()
