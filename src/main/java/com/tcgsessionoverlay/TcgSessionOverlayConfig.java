@@ -7,7 +7,6 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
-import net.runelite.client.config.Range;
 import net.runelite.client.ui.overlay.components.ComponentConstants;
 
 @ConfigGroup("tcgsessionoverlay")
@@ -23,7 +22,7 @@ public interface TcgSessionOverlayConfig extends Config
 	@ConfigItem(
 		keyName = "showCredits",
 		name = "Show credits",
-		description = "Show the credit balance, session earnings, lifetime credits and progress to the next pack.",
+		description = "Show the credits earned this session.",
 		position = 1
 	)
 	default boolean showCredits()
@@ -51,18 +50,6 @@ public interface TcgSessionOverlayConfig extends Config
 	default boolean showXpCountdown()
 	{
 		return true;
-	}
-
-	@Range(min = 1, max = 100000)
-	@ConfigItem(
-		keyName = "packCost",
-		name = "Pack cost",
-		description = "Credits per pack, taken from the Shop tab of the OSRS TCG panel. Press Enter or use the arrows to apply a typed value.",
-		position = 4
-	)
-	default int packCost()
-	{
-		return 2500;
 	}
 
 	@ConfigItem(

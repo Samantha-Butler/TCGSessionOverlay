@@ -11,7 +11,6 @@ import net.runelite.api.Skill;
 
 final class SavedStateReader extends TcgStateReader
 {
-	static final long CREDITS = 586;
 	static final int HITPOINTS_XP = 1154;
 	static final int FIREMAKING_XP = 13363;
 	static final int FIREMAKING_CARRY = 300;
@@ -33,12 +32,12 @@ final class SavedStateReader extends TcgStateReader
 		baseline.put(Skill.HITPOINTS, (long) HITPOINTS_XP);
 		baseline.put(Skill.FIREMAKING, (long) FIREMAKING_XP);
 
-		return new SavedStateReader(client, new TcgState(CREDITS, CREDITS, 1L, carry, baseline));
+		return new SavedStateReader(client, new TcgState(1L, carry, baseline));
 	}
 
 	static SavedStateReader emptySave(Client client)
 	{
-		return new SavedStateReader(client, new TcgState(0L, 0L, 1L, Collections.emptyMap(), Collections.emptyMap()));
+		return new SavedStateReader(client, new TcgState(1L, Collections.emptyMap(), Collections.emptyMap()));
 	}
 
 	@Override

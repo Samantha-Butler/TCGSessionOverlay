@@ -37,12 +37,10 @@ public class TcgStateParserTest
 	}
 
 	@Test
-	public void parsesEconomyFields()
+	public void parsesSaveTime()
 	{
 		TcgState state = parser.parse(SAMPLE).orElseThrow(AssertionError::new);
 
-		assertEquals(4640L, state.getCredits());
-		assertEquals(196040L, state.getTotalCreditsGained());
 		assertEquals(1788382179L, state.getProfileSavedAtUnix());
 	}
 
@@ -82,8 +80,7 @@ public class TcgStateParserTest
 		Optional<TcgState> parsed = parser.parse("{\"credits\":10}");
 
 		assertTrue(parsed.isPresent());
-		assertEquals(10L, parsed.get().getCredits());
-		assertEquals(0L, parsed.get().getTotalCreditsGained());
+		assertEquals(0L, parsed.get().getProfileSavedAtUnix());
 		assertEquals(0L, parsed.get().getUncreditedXp(Skill.FISHING));
 	}
 }

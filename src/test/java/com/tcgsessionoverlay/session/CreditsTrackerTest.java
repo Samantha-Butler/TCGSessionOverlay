@@ -5,8 +5,6 @@ import net.runelite.api.events.GameTick;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class CreditsTrackerTest
 {
@@ -36,12 +34,10 @@ public class CreditsTrackerTest
 		tracker.onGameTick(new GameTick());
 
 		assertEquals(100L, tracker.getSessionCreditsEarned());
-		assertTrue(tracker.hasBalance());
-		assertEquals(SavedStateReader.CREDITS + 100, tracker.getCredits());
 	}
 
 	@Test
-	public void countsSessionCreditsWithoutABalanceWhenTheSaveHasNoSkillXp()
+	public void countsSessionCreditsWhenTheSaveHasNoSkillXp()
 	{
 		CreditsTracker tracker = trackerWith(SavedStateReader.emptySave(game.client()));
 
@@ -51,12 +47,11 @@ public class CreditsTrackerTest
 		tracker.onGameTick(new GameTick());
 
 		assertEquals(100L, tracker.getSessionCreditsEarned());
-		assertFalse(tracker.hasBalance());
 	}
 
 	private CreditsTracker trackerWith(SavedStateReader reader)
 	{
-		return new CreditsTracker(game.client(), null, reader);
+		return new CreditsTracker(game.client(), reader);
 	}
 
 	private void loadSavedSkillXp()

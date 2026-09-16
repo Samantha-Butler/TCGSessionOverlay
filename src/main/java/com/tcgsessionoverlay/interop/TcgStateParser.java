@@ -42,8 +42,6 @@ public class TcgStateParser
 			}
 
 			return Optional.of(new TcgState(
-				readLong(root, "credits"),
-				readLong(root, "totalCreditsGained"),
 				readLong(root, "profileSavedAtUnix"),
 				parseSkillMap(root, "uncreditedXpBySkill"),
 				parseSkillMap(root, "skillXp")));

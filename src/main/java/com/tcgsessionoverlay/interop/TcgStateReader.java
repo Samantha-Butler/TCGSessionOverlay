@@ -100,8 +100,7 @@ public class TcgStateReader
 		{
 			String raw = Files.readString(saveFile, StandardCharsets.UTF_8);
 			Optional<TcgState> parsed = TcgStateDecoder.decode(raw).flatMap(parser::parse);
-			parsed.ifPresent(state -> log.debug("Read osrs-tcg state: credits={} lifetime={} savedAt={}",
-				state.getCredits(), state.getTotalCreditsGained(), state.getProfileSavedAtUnix()));
+			parsed.ifPresent(state -> log.debug("Read osrs-tcg state: savedAt={}", state.getProfileSavedAtUnix()));
 			return parsed;
 		}
 		catch (IOException e)

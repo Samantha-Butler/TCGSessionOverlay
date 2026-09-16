@@ -9,21 +9,15 @@ import net.runelite.api.Skill;
 @Getter
 public final class TcgState
 {
-	private final long credits;
-	private final long totalCreditsGained;
 	private final long profileSavedAtUnix;
 	private final Map<Skill, Long> uncreditedXpBySkill;
 	private final Map<Skill, Long> baselineSkillXp;
 
 	public TcgState(
-		long credits,
-		long totalCreditsGained,
 		long profileSavedAtUnix,
 		Map<Skill, Long> uncreditedXpBySkill,
 		Map<Skill, Long> baselineSkillXp)
 	{
-		this.credits = credits;
-		this.totalCreditsGained = totalCreditsGained;
 		this.profileSavedAtUnix = profileSavedAtUnix;
 		this.uncreditedXpBySkill = copyOf(uncreditedXpBySkill);
 		this.baselineSkillXp = copyOf(baselineSkillXp);
@@ -32,11 +26,6 @@ public final class TcgState
 	public long getUncreditedXp(Skill skill)
 	{
 		return uncreditedXpBySkill.getOrDefault(skill, 0L);
-	}
-
-	public boolean hasSkillXp()
-	{
-		return !baselineSkillXp.isEmpty();
 	}
 
 	public boolean hasBaselineXp(Skill skill)
