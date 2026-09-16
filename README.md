@@ -1,11 +1,11 @@
 # TCG Session Overlay
 
-Shows your OSRS TCG progress on screen while you play, so you can see how close you are to the
-next credits and the next pack without opening a panel.
+Shows your OSRS TCG credit progress on screen while you play, so you can see what this session has
+earned and how close you are to the next credits without opening a panel.
 
 ![Status](https://img.shields.io/badge/status-in%20development-orange)
 
-<img src="docs/overlay.png" alt="The overlay in game, showing credits, rates and the XP countdown" width="249">
+<img src="docs/overlay.png" alt="The overlay in game, showing credits, rates and the XP countdown" width="246">
 
 ## What you need
 
@@ -16,10 +16,7 @@ computer and never writes to it, so nothing you do here can affect your collecti
 
 ### Credits
 
-- **Balance** is your current credits.
-- **This session** is what you have earned since you logged in. It turns green once you earn anything.
-- **Lifetime** is every credit you have ever earned.
-- **Next pack** is your progress towards affording another one.
+**This session** is what you have earned since you logged in. It turns green once you earn anything.
 
 ### Rates
 
@@ -53,26 +50,17 @@ XP does not earn credits.
 | Show credits | Turn the Credits section on or off |
 | Show rates | Turn the Rates section on or off |
 | Show XP countdown | Turn the XP Countdown section on or off |
-| Pack cost | The price of the pack you buy, from the Shop tab of the OSRS TCG panel |
 | Highlight | The colour used once you have earned credits this session |
 | Hide when idle | Hides the overlay after five minutes without XP, and brings it back on your next XP drop |
 | Background | Panel colour. Drag the alpha slider left to make it more see through |
 | Number format | `199,982` or `199.9K` |
 
-Pack prices differ by region, from 2,000 for a Free-to-play pack up to 10,000 for a Clue pack, so
-set **Pack cost** to whichever one you actually buy. Typed values apply when you press Enter or
-use the small arrows.
-
 Drag the overlay to move it and drag its edge to resize it, the same as any RuneLite overlay.
 
 ## Things worth knowing
 
-**Buying a pack will not update the balance straight away.** OSRS TCG only saves to disk when you
-log out, so spending shows up next time you log in. Credits you *earn* appear immediately, because
-those are worked out from your live XP.
-
-**Pack and collection numbers live in the OSRS TCG panel.** This overlay deliberately sticks to
-credits and XP, which are the parts it can keep accurate while you play.
+**Your balance, packs and collection live in the OSRS TCG panel.** This overlay deliberately sticks
+to what you earn while you play, which it works out from your live XP and can keep accurate.
 
 **Session earnings only count what you earn here.** Credits that arrive from another device will
 not be counted as this session's, so the number stays honest.
