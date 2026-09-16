@@ -43,7 +43,7 @@ XP does not earn credits.
 
 ## Settings
 
-<img src="docs/settings.png" alt="The plugin settings panel with the Appearance section expanded" width="356">
+<img src="docs/settings.png" alt="The plugin settings panel with the Appearance section expanded" width="355">
 
 | Setting | What it does |
 | --- | --- |
